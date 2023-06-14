@@ -1,4 +1,5 @@
 use spreadsheet::data::*;
+use spreadsheet::import::*;
 use tracing::info;
 
 #[test]
@@ -97,8 +98,22 @@ fn businesses_info() -> Result<(), std::io::Error> {
     let businesses = Businesses::from_csv(file_path)?;
     let mut businesses_info = BusinessesInfo::from_license(&businesses, &licenses, &codes);
     info!("Records: {:?}", businesses_info.records.len());
-    businesses_info.to_csv("c:/users/erose/documents/businesses_import.csv".into());
+    businesses_info.to_csv("c:/users/erose/documents/businesses_import.csv".into())?;
     info!("Businesses info written to csv.");
+
+    Ok(())
+}
+
+#[test]
+fn load_county_taxlots() -> Result<(), std::io::Error> {
+    if let Ok(()) = tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::TRACE)
+        .try_init()
+    {};
+    info!("Subscriber initialized.");
+    let file_path = "c:/users/erose/documents/taxlots_zto_county.csv";
+    let lots = CountyTaxlots::from_csv(file_path)?;
+    info!("Records: {:?}", lots.records.len());
 
     Ok(())
 }
