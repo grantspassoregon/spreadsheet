@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use tracing::{error, info};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
@@ -112,6 +111,5 @@ impl CountyTaxlots {
         }
 
         Ok(CountyTaxlots { records: data })
-
     }
 }

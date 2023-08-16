@@ -13,7 +13,12 @@ pub struct IndustryCode {
 impl IndustryCode {
     pub fn sector_code(&self) -> i32 {
         let mut code_vec = Vec::new();
-        self.code.to_string().chars().take(2).map(|d| code_vec.push(d.to_digit(10).unwrap())).for_each(drop);
+        self.code
+            .to_string()
+            .chars()
+            .take(2)
+            .map(|d| code_vec.push(d.to_digit(10).unwrap()))
+            .for_each(drop);
         let code = code_vec[0] * 10 + code_vec[1];
         code as i32
     }
@@ -49,7 +54,12 @@ impl IndustryCode {
     }
     pub fn subsector_code(&self) -> i32 {
         let mut code_vec = Vec::new();
-        self.code.to_string().chars().take(4).map(|d| code_vec.push(d.to_digit(10).unwrap())).for_each(drop);
+        self.code
+            .to_string()
+            .chars()
+            .take(4)
+            .map(|d| code_vec.push(d.to_digit(10).unwrap()))
+            .for_each(drop);
         let code = code_vec[0] * 1000 + code_vec[1] * 100 + code_vec[2] * 10 + code_vec[3];
         code as i32
     }
@@ -86,7 +96,9 @@ impl IndustryCode {
             7111 => Some("Performing Arts Companies"),
             7112 => Some("Spectator Sports"),
             7113 => Some("Promoters of Performing Arts, Sports and Similar Events"),
-            7114 => Some("Agents and Managers for Artists, Athletes, Entertainers and Other Public Figures"),
+            7114 => Some(
+                "Agents and Managers for Artists, Athletes, Entertainers and Other Public Figures",
+            ),
             7115 => Some("Independent Artists, Writers and Performers"),
             7121 => Some("Museums, Historical Sites and Similar Institutions"),
             7131 => Some("Amusement Parks and Arcades"),
@@ -162,7 +174,6 @@ impl IndustryCode {
             812112 => Some("Salon"),
             812113 => Some("Salon"),
             _ => tourism,
-
         };
         match tourism {
             Some(value) => Some(value.to_string()),
@@ -171,7 +182,12 @@ impl IndustryCode {
     }
 
     pub fn from_code(code: i32, industry_codes: &IndustryCodes) -> Self {
-        let industry = industry_codes.records.iter().cloned().filter(|r| r.code == code).collect::<Vec<IndustryCode>>();
+        let industry = industry_codes
+            .records
+            .iter()
+            .cloned()
+            .filter(|r| r.code == code)
+            .collect::<Vec<IndustryCode>>();
         industry[0].clone()
     }
 }
@@ -193,7 +209,6 @@ impl IndustryCodes {
         }
 
         Ok(IndustryCodes { records: data })
-
     }
 }
 
@@ -285,7 +300,6 @@ pub struct Business {
     y_coordinate: f64,
 }
 
-
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Businesses {
     pub records: Vec<Business>,
@@ -330,7 +344,11 @@ pub struct BusinessInfo {
 }
 
 impl BusinessInfo {
-    pub fn from_license(business: &Business, licenses: &ActiveLicenses, codes: &IndustryCodes) -> Self {
+    pub fn from_license(
+        business: &Business,
+        licenses: &ActiveLicenses,
+        codes: &IndustryCodes,
+    ) -> Self {
         let company_name = business.company_name.clone();
         let contact_name = business.contact_name.clone();
         let dba = business.dba.clone();
@@ -381,8 +399,16 @@ pub struct BusinessesInfo {
 }
 
 impl BusinessesInfo {
-    pub fn from_license(businesses: &Businesses, licenses: &ActiveLicenses, codes: &IndustryCodes) -> Self {
-        let records = businesses.records.iter().map(|r| BusinessInfo::from_license(r, licenses, codes)).collect::<Vec<BusinessInfo>>();
+    pub fn from_license(
+        businesses: &Businesses,
+        licenses: &ActiveLicenses,
+        codes: &IndustryCodes,
+    ) -> Self {
+        let records = businesses
+            .records
+            .iter()
+            .map(|r| BusinessInfo::from_license(r, licenses, codes))
+            .collect::<Vec<BusinessInfo>>();
         BusinessesInfo { records }
     }
 
@@ -409,7 +435,6 @@ impl BusinessesInfo {
     }
 }
 
-
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ActiveLicense {
     #[serde(rename = "CodeNumber")]
@@ -422,7 +447,6 @@ pub struct ActiveLicense {
 pub struct ActiveLicenses {
     pub records: Vec<ActiveLicense>,
 }
-
 
 impl ActiveLicenses {
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
@@ -439,11 +463,15 @@ impl ActiveLicenses {
     }
 
     pub fn code(&self, license: &str) -> i32 {
-        let result = self.records.iter().cloned().filter(|r| r.license == license).collect::<Vec<ActiveLicense>>();
+        let result = self
+            .records
+            .iter()
+            .cloned()
+            .filter(|r| r.license == license)
+            .collect::<Vec<ActiveLicense>>();
         if result.is_empty() {
             error!("Could not process license {:?}", license);
         }
         result[0].industry_code
     }
 }
-
