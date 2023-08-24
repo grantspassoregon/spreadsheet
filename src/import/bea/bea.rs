@@ -6,11 +6,14 @@ use nom::character::complete::digit1;
 use nom::character::is_digit;
 use nom::IResult;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use tracing::{info, trace};
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct BeaDatumRaw {
+    // #[serde(deserialize_with = "crate::import::deserialize_code_keys")]
+    // code: Cainc5nCodeKey,
     code: String,
     geo_fips: i32,
     geo_name: String,
@@ -55,9 +58,11 @@ impl BeaDataRaw {
     }
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct BeaDatum {
+    // #[serde(deserialize_with = "crate::import::deserialize_code_keys")]
+    // code: Cainc5nCodeKey,
     code: String,
     geo_fips: i32,
     geo_name: String,
@@ -73,6 +78,14 @@ pub struct BeaDatum {
 impl BeaDatum {
     pub fn code(&self) -> String {
         self.code.clone()
+    }
+
+    pub fn geo_fips(&self) -> i32 {
+        self.geo_fips
+    }
+
+    pub fn time_period(&self) -> i32 {
+        self.time_period
     }
 
     pub fn description(&self) -> String {
@@ -118,6 +131,37 @@ impl BeaData {
         wtr.flush()?;
         Ok(())
     }
+
+    pub fn linecode_keys(&self) -> Vec<String> {
+        let mut keys = self.records_ref().iter().map(|r| r.code()).collect::<Vec<String>>();
+        keys.sort();
+        keys.dedup();
+        keys
+    }
+
+    pub fn linecode_hash(&self) -> HashMap<String, String> {
+        let mut hash = HashMap::new();
+        for record in self.records_ref() {
+            if !hash.contains_key(&record.code()) {
+                hash.insert(record.code(), record.description());
+            }
+        }
+        hash
+    }
+
+    pub fn geofips_keys(&self) -> Vec<i32> {
+        let mut keys = self.records_ref().iter().map(|r| r.geo_fips()).collect::<Vec<i32>>();
+        keys.sort();
+        keys.dedup();
+        keys
+    }
+
+    pub fn time_period_keys(&self) -> Vec<i32> {
+        let mut keys = self.records_ref().iter().map(|r| r.time_period()).collect::<Vec<i32>>();
+        keys.sort();
+        keys.dedup();
+        keys
+    }
 }
 
 impl TryFrom<BeaDataRaw> for BeaData {
@@ -132,6 +176,7 @@ impl TryFrom<BeaDataRaw> for BeaData {
         bar.set_style(style);
         let mut res = Vec::new();
         let mut i = 0;
+        let mut k = 0;
         for record in raw.records() {
             trace!("Processing row {}", i);
             i += 1;
@@ -148,13 +193,15 @@ impl TryFrom<BeaDataRaw> for BeaData {
                     data_value: num,
                 });
             } else {
-                info!(
-                    "Dropped record {}, fips {}, year {}: NaN",
+                trace!(
+                    "Dropped record {:?}, fips {}, year {}: NaN",
                     record.code, record.geo_fips, record.time_period
                 );
+                k += 1;
             }
             bar.inc(1);
         }
+        info!("Dropped {} records with NA values.", k);
         Ok(BeaData { records: res })
     }
 }
