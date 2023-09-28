@@ -1,11 +1,10 @@
 use serde::{Deserialize, Serialize};
+use tracing::warn;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
-pub struct CountyTaxlot {
+pub struct CityTaxlot {
     account: String,
-    #[serde(rename = "ACCTSTATUS")]
-    account_status: String,
     acreage: Option<f64>,
     addr1: String,
     addr2: Option<String>,
@@ -20,12 +19,12 @@ pub struct CountyTaxlot {
     #[serde(rename = "BLDG_CLASS")]
     building_class: Option<String>,
     block: Option<String>,
-    #[serde(rename = "City")]
-    city: String,
     code: String,
     comp_mtl: Option<String>,
     csz: String,
     deed_type: String,
+    #[serde(rename = "Doc_Link")]
+    doc_link: String,
     #[serde(rename = "GIS_Acres")]
     gis_acres: f64,
     imp_value: Option<f64>,
@@ -34,9 +33,13 @@ pub struct CountyTaxlot {
     land_appraised: Option<f64>,
     #[serde(rename = "LAND_MKT")]
     land_market: Option<f64>,
+    #[serde(rename = "Latitude")]
+    latitude: f64,
     legal_acre: Option<f64>,
     living_area: Option<f64>,
     location_description: Option<String>,
+    #[serde(rename = "Longitude")]
+    longitude: f64,
     lot: Option<String>,
     #[serde(rename = "Lot_1")]
     lot_1: Option<String>,
@@ -50,78 +53,120 @@ pub struct CountyTaxlot {
     neighborhood: String,
     #[serde(rename = "PROP_CLASS")]
     property_class: i32,
-    qq: String,
     #[serde(rename = "RMV")]
     retail_market_value: Option<f64>,
-    #[serde(rename = "RNG")]
-    range: i32,
     sale_date: Option<String>,
     sale_price: Option<f64>,
     sale_type: Option<String>,
     #[serde(rename = "SD")]
     school_district: String,
-    #[serde(rename = "SEC")]
-    section: i32,
+    #[serde(rename = "Shape_Area")]
+    shape_area: f64,
+    #[serde(rename = "Shape_Length")]
+    shape_length: f64,
     situs: String,
     situs_city: String,
     situs_pref: Option<String>,
     #[serde(rename = "SITUS_ST")]
     situs_state: String,
     situs_suf0: Option<String>,
-    #[serde(rename = "SITUS_SUFF")]
-    situs_street_name_suffix: String,
     situs_zip: i32,
     sptb_codes: Option<String>,
     #[serde(rename = "SQ_FT")]
     square_feet: Option<f64>,
-    #[serde(rename = "ST_NAME")]
-    situs_street_name: String,
-    #[serde(rename = "ST_NO")]
-    situs_address_number: String,
-    #[serde(rename = "State")]
-    mailing_state: String,
     #[serde(rename = "Taxes")]
     taxes: Option<f64>,
-    #[serde(rename = "TWN")]
-    town: i32,
     #[serde(rename = "TYPE")]
     lot_type: String,
     #[serde(rename = "YR_BLT")]
     year_built: Option<f64>,
-    #[serde(rename = "ZIP")]
-    mailing_zip: String,
     #[serde(rename = "Zone")]
     zone: String,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct CountyTaxlots {
-    pub records: Vec<CountyTaxlot>,
+impl CityTaxlot {
+    pub fn address(&self) -> String {
+        self.address.clone()
+    }
+
+    pub fn owner_name(&self) -> String {
+        self.owner_name.clone()
+    }
+
+    pub fn situs(&self) -> String {
+        self.situs.clone()
+    }
 }
 
-impl CountyTaxlots {
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct CityTaxlots {
+    records: Vec<CityTaxlot>,
+}
+
+impl CityTaxlots {
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
         let mut data = Vec::new();
         let file = std::fs::File::open(path)?;
         let mut rdr = csv::Reader::from_reader(file);
 
         for result in rdr.deserialize() {
-            let record: CountyTaxlot = result?;
+            let record: CityTaxlot = result?;
             data.push(record);
         }
 
-        Ok(CountyTaxlots { records: data })
+        Ok(CityTaxlots { records: data })
     }
 
-    pub fn records(&self) -> Vec<CountyTaxlot> {
+    pub fn records(&self) -> Vec<CityTaxlot> {
         self.records.clone()
     }
 
-    pub fn records_ref(&self) -> &Vec<CountyTaxlot> {
+    pub fn records_ref(&self) -> &Vec<CityTaxlot> {
         &self.records
     }
 
-    pub fn records_mut(&mut self) -> &mut Vec<CountyTaxlot> {
+    pub fn records_mut(&mut self) -> &mut Vec<CityTaxlot> {
         &mut self.records
+    }
+
+    pub fn addresses(&self) -> Vec<String> {
+        self.records()
+            .iter()
+            .map(|v| v.address())
+            .collect::<Vec<String>>()
+    }
+
+    pub fn owner_names(&self) -> Vec<String> {
+        self.records()
+            .iter()
+            .map(|v| v.owner_name())
+            .collect::<Vec<String>>()
+    }
+
+    pub fn associated_addresses(&self, name: &str) -> Vec<String> {
+        let mut res = self
+            .records()
+            .iter()
+            .filter(|v| v.owner_name() == name)
+            .map(|v| v.address())
+            .collect::<Vec<String>>();
+        res.sort();
+        res.dedup();
+        if res.len() > 1 {
+            warn!("{} has {} associated addresses.", name, res.len());
+        }
+        res
+    }
+
+    pub fn associated_names(&self, address: &str) -> Vec<String> {
+        let mut res = self
+            .records()
+            .iter()
+            .filter(|v| v.address() == address)
+            .map(|v| v.owner_name())
+            .collect::<Vec<String>>();
+        res.sort();
+        res.dedup();
+        res
     }
 }

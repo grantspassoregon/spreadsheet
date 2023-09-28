@@ -18,4 +18,6 @@ pub enum Error {
     FileNameError(std::ffi::OsString),
     #[error("Could not parse integer from string.")]
     IntError(#[from] std::num::ParseIntError),
+    #[error("Unexpected error.")]
+    UnknownError,
 }

@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use serde::de::Deserializer;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[allow(non_camel_case_types)]
@@ -274,9 +274,7 @@ pub fn match_code_key(input: &str) -> Option<Cainc5nCodeKey> {
     }
 }
 
-pub fn deserialize_code_keys<'de, D: Deserializer<'de>>(
-    de: D,
-) -> Result<Cainc5nCodeKey, D::Error> {
+pub fn deserialize_code_keys<'de, D: Deserializer<'de>>(de: D) -> Result<Cainc5nCodeKey, D::Error> {
     let intermediate = Deserialize::deserialize(de)?;
     Ok(match_code_key(intermediate).unwrap())
 }

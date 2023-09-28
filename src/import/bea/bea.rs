@@ -133,7 +133,11 @@ impl BeaData {
     }
 
     pub fn linecode_keys(&self) -> Vec<String> {
-        let mut keys = self.records_ref().iter().map(|r| r.code()).collect::<Vec<String>>();
+        let mut keys = self
+            .records_ref()
+            .iter()
+            .map(|r| r.code())
+            .collect::<Vec<String>>();
         keys.sort();
         keys.dedup();
         keys
@@ -150,14 +154,22 @@ impl BeaData {
     }
 
     pub fn geofips_keys(&self) -> Vec<i32> {
-        let mut keys = self.records_ref().iter().map(|r| r.geo_fips()).collect::<Vec<i32>>();
+        let mut keys = self
+            .records_ref()
+            .iter()
+            .map(|r| r.geo_fips())
+            .collect::<Vec<i32>>();
         keys.sort();
         keys.dedup();
         keys
     }
 
     pub fn time_period_keys(&self) -> Vec<i32> {
-        let mut keys = self.records_ref().iter().map(|r| r.time_period()).collect::<Vec<i32>>();
+        let mut keys = self
+            .records_ref()
+            .iter()
+            .map(|r| r.time_period())
+            .collect::<Vec<i32>>();
         keys.sort();
         keys.dedup();
         keys
@@ -195,7 +207,9 @@ impl TryFrom<BeaDataRaw> for BeaData {
             } else {
                 trace!(
                     "Dropped record {:?}, fips {}, year {}: NaN",
-                    record.code, record.geo_fips, record.time_period
+                    record.code,
+                    record.geo_fips,
+                    record.time_period
                 );
                 k += 1;
             }

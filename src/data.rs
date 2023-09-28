@@ -1,3 +1,4 @@
+use crate::{error, import};
 use serde::{Deserialize, Serialize};
 use tracing::{error, info};
 
@@ -473,5 +474,146 @@ impl ActiveLicenses {
             error!("Could not process license {:?}", license);
         }
         result[0].industry_code
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MailingListItem {
+    name: String,
+    properties: usize,
+    situs_addresses: Vec<String>,
+    mailing_address: Vec<String>,
+    associated_names: Vec<String>,
+}
+
+impl MailingListItem {
+    pub fn from_city_parcels(
+        name: &str,
+        parcels: &import::CityTaxlots,
+    ) -> Result<Self, error::Error> {
+        let addr = parcels.associated_addresses(name);
+        if !addr.is_empty() {
+            let mailing = &addr[0];
+            let names = parcels.associated_names(mailing);
+            let names = names
+                .iter()
+                .filter(|v| *v != name)
+                .map(|v| v.to_string())
+                .collect::<Vec<String>>();
+            let mut situs = Vec::new();
+            situs.append(
+                &mut parcels
+                    .records()
+                    .iter()
+                    .filter(|v| v.address() == *mailing)
+                    .map(|v| v.situs())
+                    .collect::<Vec<String>>(),
+            );
+            Ok(MailingListItem {
+                name: name.to_string(),
+                properties: situs.len(),
+                situs_addresses: situs,
+                mailing_address: addr,
+                associated_names: names,
+            })
+        } else {
+            Err(error::Error::UnknownError)
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MailingList {
+    records: Vec<MailingListItem>,
+}
+
+impl MailingList {
+    pub fn records_ref(&self) -> &Vec<MailingListItem> {
+        &self.records
+    }
+}
+
+impl TryFrom<&import::CityTaxlots> for MailingList {
+    type Error = error::Error;
+    fn try_from(parcels: &import::CityTaxlots) -> Result<Self, error::Error> {
+        let mut names = parcels.owner_names();
+        names.sort();
+        names.dedup();
+        let mut records = Vec::new();
+        for name in names {
+            records.push(MailingListItem::from_city_parcels(&name, parcels)?);
+        }
+        Ok(MailingList { records })
+    }
+}
+
+pub fn to_csv<T: Serialize + Clone, P: AsRef<std::path::Path>>(
+    item: &mut Vec<T>,
+    title: P,
+) -> Result<(), std::io::Error> {
+    let mut wtr = csv::Writer::from_path(title)?;
+    for i in item.clone() {
+        wtr.serialize(i)?;
+    }
+    wtr.flush()?;
+    Ok(())
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MailingListExportItem {
+    name: String,
+    properties: usize,
+    situs_addresses: String,
+    mailing_address: String,
+    associated_names: String,
+}
+
+impl From<&MailingListItem> for MailingListExportItem {
+    fn from(item: &MailingListItem) -> Self {
+        MailingListExportItem {
+            name: item.name.clone(),
+            properties: item.properties,
+            situs_addresses: format!("{:?}", item.situs_addresses),
+            mailing_address: format!("{:?}", item.mailing_address),
+            associated_names: format!("{:?}", item.associated_names),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MailingListExport {
+    records: Vec<MailingListExportItem>,
+}
+
+impl MailingListExport {
+    pub fn new(records: Vec<MailingListExportItem>) -> Self {
+        MailingListExport { records }
+    }
+
+    pub fn to_csv<P: AsRef<std::path::Path>>(&mut self, path: P) -> Result<(), error::Error> {
+        Ok(to_csv(&mut self.records, path)?)
+    }
+
+    pub fn records_ref(&self) -> &Vec<MailingListExportItem> {
+        &self.records
+    }
+
+    pub fn sort_by_key(&mut self, key: &str) {
+        match key {
+            "properties" => self.records.sort_by_key(|v| v.properties),
+            "name" => self.records.sort_by_key(|v| v.name.clone()),
+            _ => {}
+        }
+    }
+}
+
+impl From<&MailingList> for MailingListExport {
+    fn from(items: &MailingList) -> Self {
+        let records = items
+            .records_ref()
+            .iter()
+            .map(|v| MailingListExportItem::from(v))
+            .collect::<Vec<MailingListExportItem>>();
+        MailingListExport { records }
     }
 }
