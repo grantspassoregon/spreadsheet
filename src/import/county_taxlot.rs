@@ -1,5 +1,7 @@
+use crate::utils;
 use serde::{Deserialize, Serialize};
 
+/// The `CountyTaxlot` struct holds data associated with Josephine County tax parcels.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
 pub struct CountyTaxlot {
@@ -94,33 +96,34 @@ pub struct CountyTaxlot {
     zone: String,
 }
 
+/// The `CountyTaxlots` struct holds a `records` field that contains a vector of type
+/// [`CountyTaxlot`].
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CountyTaxlots {
-    pub records: Vec<CountyTaxlot>,
+    records: Vec<CountyTaxlot>,
 }
 
 impl CountyTaxlots {
+    /// Writes the contents of [`CountyTaxlots`] to a CSV file at the location specified in `path`.
+    /// Each element in the vector of type [`CountyTaxlot`] maps to a row on the spreadsheet.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
-        let mut data = Vec::new();
-        let file = std::fs::File::open(path)?;
-        let mut rdr = csv::Reader::from_reader(file);
-
-        for result in rdr.deserialize() {
-            let record: CountyTaxlot = result?;
-            data.push(record);
-        }
-
-        Ok(CountyTaxlots { records: data })
+        let records = utils::from_csv(path)?;
+        Ok(CountyTaxlots { records })
     }
 
+    /// The `records` field holds a vector of type [`CountyTaxlot`].  This function returns the
+    /// cloned value of the field.
     pub fn records(&self) -> Vec<CountyTaxlot> {
         self.records.clone()
     }
 
+    /// This function returns a reference to the vector of type [`CountyTaxlot`] in the `records` field.
     pub fn records_ref(&self) -> &Vec<CountyTaxlot> {
         &self.records
     }
 
+    /// This function returns a mutable reference to the vector of type [`CountyTaxlot`] in the
+    /// `records` field.
     pub fn records_mut(&mut self) -> &mut Vec<CountyTaxlot> {
         &mut self.records
     }

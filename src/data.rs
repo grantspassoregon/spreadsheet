@@ -1,7 +1,11 @@
-use crate::{error, import};
+use crate::{error, import, utils};
+use indicatif::ProgressBar;
+use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
+use std::fmt;
 use tracing::{error, info};
 
+/// The `IndustryCode` struct represents the NAICS Industry Code associated with a business.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
 pub struct IndustryCode {
@@ -12,6 +16,8 @@ pub struct IndustryCode {
 }
 
 impl IndustryCode {
+    /// The NAICS sector code is the first two digits of the Industry Code.  This function
+    /// returns the sector code for an [`IndustryCode`].
     pub fn sector_code(&self) -> i32 {
         let mut code_vec = Vec::new();
         self.code
@@ -23,6 +29,8 @@ impl IndustryCode {
         let code = code_vec[0] * 10 + code_vec[1];
         code as i32
     }
+
+    /// The `sector` function matches the NAICS sector code with a string description of the sector.
     pub fn sector(&self) -> Option<String> {
         let code = self.sector_code();
         let sector = match code {
@@ -53,6 +61,9 @@ impl IndustryCode {
             None => None,
         }
     }
+
+    /// The NAICS subsector code is the first four digits of the Industry Code.  This function
+    /// returns the subsector code for an [`IndustryCode`].
     pub fn subsector_code(&self) -> i32 {
         let mut code_vec = Vec::new();
         self.code
@@ -64,6 +75,8 @@ impl IndustryCode {
         let code = code_vec[0] * 1000 + code_vec[1] * 100 + code_vec[2] * 10 + code_vec[3];
         code as i32
     }
+
+    /// The `subsector` function matches the NAICS subsector code with a string description of the subsector.
     pub fn subsector(&self) -> Option<String> {
         let code = self.subsector_code();
         let subsector = match code {
@@ -118,6 +131,11 @@ impl IndustryCode {
             None => None,
         }
     }
+    
+    /// The `tourism` function matches a subsector code to a string description of the tourism
+    /// category associated with the subsector.  The categories generally describe the areas of
+    /// interest for tourism, used for symbolizing business locations on the web viewer, and
+    /// enhancing search.
     pub fn tourism(&self) -> Option<String> {
         let code = self.subsector_code();
         let tourism = match code {
@@ -184,7 +202,7 @@ impl IndustryCode {
 
     pub fn from_code(code: i32, industry_codes: &IndustryCodes) -> Self {
         let industry = industry_codes
-            .records
+            .records_ref()
             .iter()
             .cloned()
             .filter(|r| r.code == code)
@@ -193,26 +211,29 @@ impl IndustryCode {
     }
 }
 
+/// The `IndustryCodes` struct holds a `records` field that contains a vector of type
+/// [`IndustryCode`].
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct IndustryCodes {
-    pub records: Vec<IndustryCode>,
+    records: Vec<IndustryCode>,
 }
 
 impl IndustryCodes {
+    /// The `records` field contains a vector of type [`IndustryCode`].  This function returns a
+    /// reference to the vector.
+    pub fn records_ref(&self) -> &Vec<IndustryCode> {
+        &self.records
+    }
+
+    /// Read the contents of a CSV file at location `path` into an `IndustryCodes` struct.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
-        let mut data = Vec::new();
-        let file = std::fs::File::open(path)?;
-        let mut rdr = csv::Reader::from_reader(file);
-
-        for result in rdr.deserialize() {
-            let record: IndustryCode = result?;
-            data.push(record);
-        }
-
-        Ok(IndustryCodes { records: data })
+        let records = utils::from_csv(path)?;
+        Ok(IndustryCodes { records })
     }
 }
 
+/// The `IndustryInfo` struct stores codes, names and descriptions for the NAICS Industry, Sector
+/// and Subsector designations for a business.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct IndustryInfo {
     industry_code: i32,
@@ -257,6 +278,8 @@ impl From<&IndustryCode> for IndustryInfo {
     }
 }
 
+/// The `IndustryInfos` struct holds a `records` field that contains a vector of type
+/// [`IndustryCode`].
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct IndustryInfos {
     records: Vec<IndustryInfo>,
@@ -273,16 +296,21 @@ impl From<&IndustryCodes> for IndustryInfos {
 }
 
 impl IndustryInfos {
+    /// Write the contents of `IndustryInfos` to a CSV file at location `title`.  Each element in
+    /// the vector of type [`IndustryInfo`] maps to a row of data on the CSV.
     pub fn to_csv(&mut self, title: std::path::PathBuf) -> Result<(), std::io::Error> {
-        let mut wtr = csv::Writer::from_path(title)?;
-        for i in self.records.clone() {
-            wtr.serialize(i)?;
-        }
-        wtr.flush()?;
+        utils::to_csv(self.records_mut(), title)?;
         Ok(())
+    }
+
+    /// The `records` field contains a vector of type [`IndustryInfo`].  This function returns a
+    /// mutable reference to the field.
+    pub fn records_mut(&mut self) -> &mut Vec<IndustryInfo> {
+        &mut self.records
     }
 }
 
+/// The `Business` struct represents a business license for the City of Grants Pass.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Business {
     company_name: String,
@@ -303,21 +331,17 @@ pub struct Business {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Businesses {
-    pub records: Vec<Business>,
+    records: Vec<Business>,
 }
 
 impl Businesses {
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
-        let mut data = Vec::new();
-        let file = std::fs::File::open(path)?;
-        let mut rdr = csv::Reader::from_reader(file);
+        let records = utils::from_csv(path)?;
+        Ok(Businesses { records })
+    }
 
-        for result in rdr.deserialize() {
-            let record: Business = result?;
-            data.push(record);
-        }
-
-        Ok(Businesses { records: data })
+    pub fn records_ref(&self) -> &Vec<Business> {
+        &self.records
     }
 }
 
@@ -396,7 +420,7 @@ impl BusinessInfo {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BusinessesInfo {
-    pub records: Vec<BusinessInfo>,
+    records: Vec<BusinessInfo>,
 }
 
 impl BusinessesInfo {
@@ -414,58 +438,60 @@ impl BusinessesInfo {
     }
 
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
-        let mut data = Vec::new();
-        let file = std::fs::File::open(path)?;
-        let mut rdr = csv::Reader::from_reader(file);
-
-        for result in rdr.deserialize() {
-            let record: BusinessInfo = result?;
-            data.push(record);
-        }
-
-        Ok(BusinessesInfo { records: data })
+        let records = utils::from_csv(path)?;
+        Ok(BusinessesInfo { records })
     }
 
     pub fn to_csv(&mut self, title: std::path::PathBuf) -> Result<(), std::io::Error> {
-        let mut wtr = csv::Writer::from_path(title)?;
-        for i in self.records.clone() {
-            wtr.serialize(i)?;
-        }
-        wtr.flush()?;
+        utils::to_csv(self.records_mut(), title)?;
         Ok(())
+    }
+
+    pub fn records_ref(&self) -> &Vec<BusinessInfo> {
+        &self.records
+    }
+
+    pub fn records_mut(&mut self) -> &mut Vec<BusinessInfo> {
+        &mut self.records
     }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ActiveLicense {
     #[serde(rename = "CodeNumber")]
-    pub industry_code: i32,
+    industry_code: i32,
     #[serde(rename = "LICENSENUMBER")]
-    pub license: String,
+    license: String,
+}
+
+impl ActiveLicense {
+    pub fn license(&self) -> String {
+        self.license.clone()
+    }
+
+    pub fn license_ref(&self) -> &String {
+        &self.license
+    }
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ActiveLicenses {
-    pub records: Vec<ActiveLicense>,
+    records: Vec<ActiveLicense>,
 }
 
 impl ActiveLicenses {
+    pub fn records_ref(&self) -> &Vec<ActiveLicense> {
+        &self.records
+    }
+
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
-        let mut data = Vec::new();
-        let file = std::fs::File::open(path)?;
-        let mut rdr = csv::Reader::from_reader(file);
-
-        for result in rdr.deserialize() {
-            let record: ActiveLicense = result?;
-            data.push(record);
-        }
-
-        Ok(ActiveLicenses { records: data })
+        let records = utils::from_csv(path)?;
+        Ok(ActiveLicenses { records })
     }
 
     pub fn code(&self, license: &str) -> i32 {
         let result = self
-            .records
+            .records_ref()
             .iter()
             .cloned()
             .filter(|r| r.license == license)
@@ -478,43 +504,87 @@ impl ActiveLicenses {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+struct FlatList(Vec<String>);
+
+impl FlatList {
+    pub fn new(list: Vec<String>) -> Self {
+        FlatList(list)
+    }
+}
+
+impl fmt::Display for FlatList {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut flat = "".to_string();
+        for (i, item) in self.0.iter().enumerate() {
+            if i > 0 {
+                flat.push_str(", ");
+            }
+            flat.push_str(&item);
+        }
+        write!(f, "{}", flat)
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MailingListItem {
     name: String,
     properties: usize,
-    situs_addresses: Vec<String>,
-    mailing_address: Vec<String>,
-    associated_names: Vec<String>,
+    situs_addresses: FlatList,
+    mailing_address: FlatList,
+    mailing_csz: FlatList,
+    associated_names: FlatList,
+    parcels: FlatList,
 }
 
 impl MailingListItem {
     pub fn from_city_parcels(
         name: &str,
         parcels: &import::CityTaxlots,
+        done: &mut std::collections::HashSet<String>,
     ) -> Result<Self, error::Error> {
+        done.insert(name.to_string());
         let addr = parcels.associated_addresses(name);
         if !addr.is_empty() {
+            let mut csz = parcels
+                .records_ref()
+                .iter()
+                .filter(|v| addr.contains(v.address_ref()))
+                .map(|v| v.csz())
+                .collect::<Vec<String>>();
+            csz.sort();
+            csz.dedup();
             let mailing = &addr[0];
             let names = parcels.associated_names(mailing);
+            for i in &names {
+                if !done.contains(i) {
+                    done.insert(i.to_string());
+                }
+            }
             let names = names
-                .iter()
+                .par_iter()
                 .filter(|v| *v != name)
                 .map(|v| v.to_string())
                 .collect::<Vec<String>>();
-            let mut situs = Vec::new();
-            situs.append(
-                &mut parcels
-                    .records()
-                    .iter()
-                    .filter(|v| v.address() == *mailing)
-                    .map(|v| v.situs())
-                    .collect::<Vec<String>>(),
-            );
+            let situs = parcels
+                .records_ref()
+                .par_iter()
+                .filter(|v| v.address_ref() == mailing)
+                .map(|v| v.situs())
+                .collect::<Vec<String>>();
+            let tax_parcels = parcels
+                .records_ref()
+                .par_iter()
+                .filter(|v| situs.contains(v.situs_ref()))
+                .map(|v| v.parcel())
+                .collect::<Vec<String>>();
             Ok(MailingListItem {
                 name: name.to_string(),
                 properties: situs.len(),
-                situs_addresses: situs,
-                mailing_address: addr,
-                associated_names: names,
+                situs_addresses: FlatList::new(situs),
+                mailing_address: FlatList::new(addr),
+                mailing_csz: FlatList::new(csz),
+                associated_names: FlatList::new(names),
+                parcels: FlatList::new(tax_parcels),
             })
         } else {
             Err(error::Error::UnknownError)
@@ -536,27 +606,28 @@ impl MailingList {
 impl TryFrom<&import::CityTaxlots> for MailingList {
     type Error = error::Error;
     fn try_from(parcels: &import::CityTaxlots) -> Result<Self, error::Error> {
+        info!("Importing from city parcels.");
+        let style = indicatif::ProgressStyle::with_template(
+            "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {'Importing city parcels...'}",
+        )
+        .unwrap();
         let mut names = parcels.owner_names();
         names.sort();
         names.dedup();
+        let bar = ProgressBar::new(names.len() as u64);
+        bar.set_style(style);
         let mut records = Vec::new();
+        let mut done = std::collections::HashSet::new();
         for name in names {
-            records.push(MailingListItem::from_city_parcels(&name, parcels)?);
+            if !done.contains(&name) {
+                records.push(MailingListItem::from_city_parcels(
+                    &name, parcels, &mut done,
+                )?);
+            }
+            bar.inc(1);
         }
         Ok(MailingList { records })
     }
-}
-
-pub fn to_csv<T: Serialize + Clone, P: AsRef<std::path::Path>>(
-    item: &mut Vec<T>,
-    title: P,
-) -> Result<(), std::io::Error> {
-    let mut wtr = csv::Writer::from_path(title)?;
-    for i in item.clone() {
-        wtr.serialize(i)?;
-    }
-    wtr.flush()?;
-    Ok(())
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -565,7 +636,9 @@ pub struct MailingListExportItem {
     properties: usize,
     situs_addresses: String,
     mailing_address: String,
+    mailing_csz: String,
     associated_names: String,
+    parcels: String,
 }
 
 impl From<&MailingListItem> for MailingListExportItem {
@@ -573,9 +646,11 @@ impl From<&MailingListItem> for MailingListExportItem {
         MailingListExportItem {
             name: item.name.clone(),
             properties: item.properties,
-            situs_addresses: format!("{:?}", item.situs_addresses),
-            mailing_address: format!("{:?}", item.mailing_address),
-            associated_names: format!("{:?}", item.associated_names),
+            situs_addresses: format!("{}", item.situs_addresses),
+            mailing_address: format!("{}", item.mailing_address),
+            mailing_csz: format!("{}", item.mailing_csz),
+            associated_names: format!("{}", item.associated_names),
+            parcels: format!("{}", item.parcels),
         }
     }
 }
@@ -591,11 +666,16 @@ impl MailingListExport {
     }
 
     pub fn to_csv<P: AsRef<std::path::Path>>(&mut self, path: P) -> Result<(), error::Error> {
-        Ok(to_csv(&mut self.records, path)?)
+        utils::to_csv(self.records_mut(), path)?;
+        Ok(())
     }
 
     pub fn records_ref(&self) -> &Vec<MailingListExportItem> {
         &self.records
+    }
+
+    pub fn records_mut(&mut self) -> &mut Vec<MailingListExportItem> {
+        &mut self.records
     }
 
     pub fn sort_by_key(&mut self, key: &str) {

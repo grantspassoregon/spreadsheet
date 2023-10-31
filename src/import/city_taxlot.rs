@@ -1,3 +1,5 @@
+use crate::utils;
+use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use tracing::warn;
 
@@ -60,10 +62,10 @@ pub struct CityTaxlot {
     sale_type: Option<String>,
     #[serde(rename = "SD")]
     school_district: String,
-    #[serde(rename = "Shape_Area")]
-    shape_area: f64,
-    #[serde(rename = "Shape_Length")]
-    shape_length: f64,
+    // #[serde(rename = "Shape_Area")]
+    // shape_area: f64,
+    // #[serde(rename = "Shape_Length")]
+    // shape_length: f64,
     situs: String,
     situs_city: String,
     situs_pref: Option<String>,
@@ -89,12 +91,28 @@ impl CityTaxlot {
         self.address.clone()
     }
 
+    pub fn address_ref(&self) -> &String {
+        &self.address
+    }
+
+    pub fn csz(&self) -> String {
+        self.csz.clone()
+    }
+
     pub fn owner_name(&self) -> String {
         self.owner_name.clone()
     }
 
+    pub fn parcel(&self) -> String {
+        self.map_number.clone()
+    }
+
     pub fn situs(&self) -> String {
         self.situs.clone()
+    }
+
+    pub fn situs_ref(&self) -> &String {
+        &self.situs
     }
 }
 
@@ -105,16 +123,8 @@ pub struct CityTaxlots {
 
 impl CityTaxlots {
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
-        let mut data = Vec::new();
-        let file = std::fs::File::open(path)?;
-        let mut rdr = csv::Reader::from_reader(file);
-
-        for result in rdr.deserialize() {
-            let record: CityTaxlot = result?;
-            data.push(record);
-        }
-
-        Ok(CityTaxlots { records: data })
+        let records = utils::from_csv(path)?;
+        Ok(CityTaxlots { records })
     }
 
     pub fn records(&self) -> Vec<CityTaxlot> {
@@ -130,23 +140,23 @@ impl CityTaxlots {
     }
 
     pub fn addresses(&self) -> Vec<String> {
-        self.records()
-            .iter()
+        self.records_ref()
+            .par_iter()
             .map(|v| v.address())
             .collect::<Vec<String>>()
     }
 
     pub fn owner_names(&self) -> Vec<String> {
-        self.records()
-            .iter()
+        self.records_ref()
+            .par_iter()
             .map(|v| v.owner_name())
             .collect::<Vec<String>>()
     }
 
     pub fn associated_addresses(&self, name: &str) -> Vec<String> {
         let mut res = self
-            .records()
-            .iter()
+            .records_ref()
+            .par_iter()
             .filter(|v| v.owner_name() == name)
             .map(|v| v.address())
             .collect::<Vec<String>>();
@@ -160,8 +170,8 @@ impl CityTaxlots {
 
     pub fn associated_names(&self, address: &str) -> Vec<String> {
         let mut res = self
-            .records()
-            .iter()
+            .records_ref()
+            .par_iter()
             .filter(|v| v.address() == address)
             .map(|v| v.owner_name())
             .collect::<Vec<String>>();

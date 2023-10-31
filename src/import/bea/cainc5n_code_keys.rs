@@ -1,6 +1,8 @@
 use serde::de::Deserializer;
 use serde::{Deserialize, Serialize};
 
+/// The `Cainc5nCodeKey` enum contains code keys for the Personal Income by Major Component and Earnings by NAICS Industry table from the BEA Regional dataset.
+#[allow(missing_docs)]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[allow(non_camel_case_types)]
 pub enum Cainc5nCodeKey {
@@ -137,6 +139,8 @@ pub enum Cainc5nCodeKey {
     CAINC5N_907,
 }
 
+/// Matches the string representation of a CAINC5N code key with the corresponding variant of enum
+/// [`Cainc5nCodeKey`].
 pub fn match_code_key(input: &str) -> Option<Cainc5nCodeKey> {
     match input {
         "CAINC5N-10" => Some(Cainc5nCodeKey::CAINC5N_10),
@@ -274,6 +278,7 @@ pub fn match_code_key(input: &str) -> Option<Cainc5nCodeKey> {
     }
 }
 
+/// Deserialization function for CAINC5N code keys.
 pub fn deserialize_code_keys<'de, D: Deserializer<'de>>(de: D) -> Result<Cainc5nCodeKey, D::Error> {
     let intermediate = Deserialize::deserialize(de)?;
     Ok(match_code_key(intermediate).unwrap())

@@ -5,7 +5,7 @@ use tracing::{info, trace};
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
-    #[arg(short = 'c', long, help = "Command to execute.")]
+    #[arg(short = 'c', long, help = CMD_HELP)]
     command: String,
     #[arg(
         short = 's',
@@ -16,6 +16,12 @@ struct Cli {
     source: Option<String>,
 }
 
+const CMD_HELP: &str = "
+Command to execute, including:
+* load_bea <PATH> -> Load BEA data stored locally on disk.
+* load_parcels <PATH> -> Load taxlots from a CSV.
+";
+
 fn main() -> Result<(), error::Error> {
     if let Ok(()) = tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
@@ -25,6 +31,14 @@ fn main() -> Result<(), error::Error> {
     let cli = Cli::parse();
 
     match cli.command.as_str() {
+        "read_bea" => {
+            dotenv::dotenv().ok();
+            let path = std::env::var("BEA_CAINC5N_CSV")?;
+            let records = import::BeaData::from_csv(path)?;
+            info!("Records: {}", records.records_ref().len());
+            let hash = records.linecode_hash();
+            info!("Hash is {:#?}", hash);
+        }
         "load_bea" => {
             dotenv::dotenv().ok();
             let raw = std::env::var("BEA_CAINC5N_RAW")?;
@@ -35,7 +49,7 @@ fn main() -> Result<(), error::Error> {
             if let Some(path) = cli.source {
                 records.to_csv(path)?;
             }
-            info!("Records: {}", records.records().len());
+            info!("Records: {}", records.records_ref().len());
         }
         "load_parcels" => {
             if let Some(path) = cli.source {
@@ -48,7 +62,7 @@ fn main() -> Result<(), error::Error> {
                 let mail: Vec<data::MailingListExportItem> =
                     mail.records_ref().iter().rev().cloned().collect();
                 let mut mail = data::MailingListExport::new(mail);
-                mail.to_csv("p:/cbd_multistory_mailing_list.csv")?;
+                mail.to_csv("c:/users/erose/documents/mailing_list.csv")?;
             }
         }
         _ => {}

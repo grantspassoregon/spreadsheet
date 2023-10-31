@@ -13,7 +13,7 @@ fn load_industry_codes() -> Result<(), std::io::Error> {
 
     let file_path = "c:/users/erose/documents/business_categories.csv";
     let records = IndustryCodes::from_csv(file_path)?;
-    info!("Records: {:?}", records.records.len());
+    info!("Records: {:?}", records.records_ref().len());
 
     Ok(())
 }
@@ -28,7 +28,7 @@ fn write_industry_info() -> Result<(), std::io::Error> {
 
     let file_path = "c:/users/erose/documents/business_categories.csv";
     let records = IndustryCodes::from_csv(file_path)?;
-    info!("Records: {:?}", records.records.len());
+    info!("Records: {:?}", records.records_ref().len());
     let mut industry_info = IndustryInfos::from(&records);
     industry_info.to_csv("c:/users/erose/documents/industry_info.csv".into())?;
 
@@ -45,7 +45,7 @@ fn load_businesses() -> Result<(), std::io::Error> {
 
     let file_path = "c:/users/erose/documents/businesses_export.csv";
     let records = Businesses::from_csv(file_path)?;
-    info!("Records: {:?}", records.records.len());
+    info!("Records: {:?}", records.records_ref().len());
 
     Ok(())
 }
@@ -60,7 +60,7 @@ fn load_licenses() -> Result<(), std::io::Error> {
 
     let file_path = "c:/users/erose/documents/active_business.csv";
     let records = ActiveLicenses::from_csv(file_path)?;
-    info!("Records: {:?}", records.records.len());
+    info!("Records: {:?}", records.records_ref().len());
 
     Ok(())
 }
@@ -75,8 +75,8 @@ fn license_code() -> Result<(), std::io::Error> {
 
     let file_path = "c:/users/erose/documents/active_business.csv";
     let records = ActiveLicenses::from_csv(file_path)?;
-    info!("Records: {:?}", records.records.len());
-    let license = records.records[0].license.clone();
+    info!("Records: {:?}", records.records_ref().len());
+    let license = records.records_ref()[0].license();
     let code = records.code(&license);
     info!("Code is: {:?}", code);
 
@@ -98,7 +98,7 @@ fn businesses_info() -> Result<(), std::io::Error> {
     let file_path = "c:/users/erose/documents/businesses_export.csv";
     let businesses = Businesses::from_csv(file_path)?;
     let mut businesses_info = BusinessesInfo::from_license(&businesses, &licenses, &codes);
-    info!("Records: {:?}", businesses_info.records.len());
+    info!("Records: {:?}", businesses_info.records_ref().len());
     businesses_info.to_csv("c:/users/erose/documents/businesses_import.csv".into())?;
     info!("Businesses info written to csv.");
 
@@ -114,7 +114,7 @@ fn load_county_taxlots() -> Result<(), std::io::Error> {
     trace!("Subscriber initialized.");
     let file_path = "c:/users/erose/documents/taxlots_zto_county.csv";
     let lots = CountyTaxlots::from_csv(file_path)?;
-    info!("Records: {:?}", lots.records.len());
+    info!("Records: {:?}", lots.records_ref().len());
 
     Ok(())
 }

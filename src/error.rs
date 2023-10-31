@@ -1,5 +1,7 @@
 use thiserror::Error;
 
+pub type SheetResult<T> = Result<T, Error>;
+
 #[derive(Error, Debug)]
 pub enum Error {
     #[error("Parse error.")]

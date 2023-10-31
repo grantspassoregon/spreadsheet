@@ -1,16 +1,17 @@
-use crate::error;
-use indicatif::ProgressBar;
+use crate::{error, utils};
+use indicatif::{ProgressBar, ProgressStyle};
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::character::complete::digit1;
 use nom::character::is_digit;
 use nom::IResult;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 use tracing::{info, trace};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
+/// The `BeaDatumRaw` struct holds a record from the BEA website API before processing.
 pub struct BeaDatumRaw {
     // #[serde(deserialize_with = "crate::import::deserialize_code_keys")]
     // code: Cainc5nCodeKey,
@@ -27,39 +28,55 @@ pub struct BeaDatumRaw {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+/// The `BeaDataRaw` struct contains a `records` field that holds a vector of type [`BeaDatumRaw`].
 pub struct BeaDataRaw {
     records: Vec<BeaDatumRaw>,
 }
 
 impl BeaDataRaw {
-    pub fn records_ref(&self) -> &Vec<BeaDatumRaw> {
-        &self.records
-    }
-
-    pub fn records_mut(&mut self) -> &mut Vec<BeaDatumRaw> {
-        &mut self.records
-    }
-
+    /// The `records` field holds a vector of type [`BeaDatumRaw`].  This function returns the
+    /// cloned value of the field.
     pub fn records(&self) -> Vec<BeaDatumRaw> {
         self.records.clone()
     }
 
+    /// This method returns a reference to the `records` field.
+    pub fn records_ref(&self) -> &Vec<BeaDatumRaw> {
+        &self.records
+    }
+
+    /// This method returns a mutable reference to the `records` field.
+    pub fn records_mut(&mut self) -> &mut Vec<BeaDatumRaw> {
+        &mut self.records
+    }
+
+    /// This method loads a `BeaDataRaw` from a CSV located at `path`.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
-        let mut data = Vec::new();
-        let file = std::fs::File::open(path)?;
-        let mut rdr = csv::Reader::from_reader(file);
-
-        for result in rdr.deserialize() {
-            let record: BeaDatumRaw = result?;
-            data.push(record);
-        }
-
-        Ok(BeaDataRaw { records: data })
+        let bar = ProgressBar::new_spinner();
+        bar.enable_steady_tick(Duration::from_millis(120));
+        bar.set_style(
+            ProgressStyle::with_template("{spinner:.blue} {msg}")
+            .unwrap()
+            .tick_strings(&[
+                "▹▹▹▹▹",
+                "▸▹▹▹▹",
+                "▹▸▹▹▹",
+                "▹▹▸▹▹",
+                "▹▹▹▸▹",
+                "▹▹▹▹▸",
+                "▪▪▪▪▪",
+            ]),
+        );
+        bar.set_message("Loading...");
+        let records = utils::from_csv(path)?;
+        bar.finish_with_message("Loaded!");
+        Ok(BeaDataRaw { records })
     }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
+/// The `BeaDatum` struct holds data processed from a [`BeaDatumRaw`] struct.
 pub struct BeaDatum {
     // #[serde(deserialize_with = "crate::import::deserialize_code_keys")]
     // code: Cainc5nCodeKey,
@@ -76,62 +93,69 @@ pub struct BeaDatum {
 }
 
 impl BeaDatum {
+    /// The `code` field represents the BEA table code.  This function returns the cloned value of
+    /// the field.
     pub fn code(&self) -> String {
         self.code.clone()
     }
 
+    /// The `geo_fips` field represents the FIPS number of the datum.  This function returns the
+    /// value of the field.
     pub fn geo_fips(&self) -> i32 {
         self.geo_fips
     }
 
+    /// The `time_period` field represents the year of the datum.  This function returns the value
+    /// of the field.
     pub fn time_period(&self) -> i32 {
         self.time_period
     }
 
+    /// The `description` returns a description of the data value.  This function returns the
+    /// cloned value of the field.
     pub fn description(&self) -> String {
         self.description.clone()
     }
 }
 
+/// The `BeaData` struct holds BEA data processed into library form.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BeaData {
     records: Vec<BeaDatum>,
 }
 
 impl BeaData {
-    pub fn records_ref(&self) -> &Vec<BeaDatum> {
-        &self.records
-    }
-
-    pub fn records_mut(&mut self) -> &mut Vec<BeaDatum> {
-        &mut self.records
-    }
-
+    /// The `records` field holds a vector of type [`BeaDatum`].  This function returns the
+    /// cloned value of the field.
     pub fn records(&self) -> Vec<BeaDatum> {
         self.records.clone()
     }
 
-    pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
-        let mut data = Vec::new();
-        let file = std::fs::File::open(path)?;
-        let mut rdr = csv::Reader::from_reader(file);
-
-        for result in rdr.deserialize() {
-            let record: BeaDatum = result?;
-            data.push(record);
-        }
-        Ok(BeaData { records: data })
+    /// This method returns a reference to the `records` field.
+    pub fn records_ref(&self) -> &Vec<BeaDatum> {
+        &self.records
     }
 
+    /// This method returns a mutable reference to the `records` field.
+    pub fn records_mut(&mut self) -> &mut Vec<BeaDatum> {
+        &mut self.records
+    }
+
+    /// This method loads a `BeaData` from a CSV located at `path`.
+    pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
+        let records = utils::from_csv(path)?;
+        Ok(BeaData { records })
+    }
+
+    /// This method writes the vector of type [`BeaDatum`] in the `records` field of `BeaData` to a
+    /// CSV file at location `title`.  Each element in the vector will become a row in the
+    /// spreadsheet.
     pub fn to_csv<P: AsRef<std::path::Path>>(&mut self, title: P) -> Result<(), std::io::Error> {
-        let mut wtr = csv::Writer::from_path(title)?;
-        for i in self.records.clone() {
-            wtr.serialize(i)?;
-        }
-        wtr.flush()?;
+        utils::to_csv(self.records_mut(), title)?;
         Ok(())
     }
 
+    /// This functions returns unique line code values from the `records` vector.
     pub fn linecode_keys(&self) -> Vec<String> {
         let mut keys = self
             .records_ref()
@@ -143,6 +167,7 @@ impl BeaData {
         keys
     }
 
+    /// This function returns a HashMap of line code keys and description values.
     pub fn linecode_hash(&self) -> HashMap<String, String> {
         let mut hash = HashMap::new();
         for record in self.records_ref() {
@@ -153,6 +178,7 @@ impl BeaData {
         hash
     }
 
+    /// This functions returns unique FIPS numbers from the `records` vector.
     pub fn geofips_keys(&self) -> Vec<i32> {
         let mut keys = self
             .records_ref()
@@ -164,6 +190,7 @@ impl BeaData {
         keys
     }
 
+    /// This function returns unique year values from the `records` vector.
     pub fn time_period_keys(&self) -> Vec<i32> {
         let mut keys = self
             .records_ref()
@@ -220,7 +247,9 @@ impl TryFrom<BeaDataRaw> for BeaData {
     }
 }
 
-pub fn remove_comma<'a, 'b>(
+/// This functions removes commas and note tags (trailing 'E's) from BEA values.  Called by
+/// ['str_to_int'].
+fn remove_comma<'a, 'b>(
     value: &'a str,
     num: Option<String>,
 ) -> IResult<&'a str, Option<String>> {
@@ -249,7 +278,9 @@ pub fn remove_comma<'a, 'b>(
     }
 }
 
-pub fn str_to_int(value: &str) -> Result<Option<i64>, error::Error> {
+/// This function converts the string representation of a number where thousands are separated by
+/// commas into an integer type.  Calls ['remove_comma'].  Called by [`BeaData::try_from()`].
+fn str_to_int(value: &str) -> Result<Option<i64>, error::Error> {
     let stub = "".to_string();
     if let Ok((_, res)) = remove_comma(value, Some(stub)) {
         if let Some(val) = res {
