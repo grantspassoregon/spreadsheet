@@ -3,6 +3,21 @@
 version = 3
 
 [[package]]
+name = "address"
+version = "0.1.0"
+dependencies = [
+ "clap 4.3.3",
+ "csv",
+ "indicatif",
+ "nom",
+ "rayon",
+ "serde",
+ "thiserror",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "adler"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1252,6 +1267,7 @@ checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
 name = "spreadsheet"
 version = "0.1.0"
 dependencies = [
+ "address",
  "clap 4.3.3",
  "criterion",
  "csv",

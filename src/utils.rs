@@ -1,6 +1,6 @@
 //! The `utils` module contains utility functions accessed by multiple data types, where declaring
 //! a stand-alone function eliminates code duplication in different methods.
-use serde::de::{Deserialize, Deserializer, DeserializeOwned};
+use serde::de::{Deserialize, DeserializeOwned, Deserializer};
 use serde::Serialize;
 
 /// Function for deserailizing ArcGIS data that may contain either empty (Null) fields, or fields
@@ -33,7 +33,9 @@ pub fn to_csv<T: Serialize + Clone, P: AsRef<std::path::Path>>(
 
 /// Generic function to deserialize data types from a CSV file.  Called by methods to avoid code
 /// duplication.
-pub fn from_csv<T: DeserializeOwned + Clone, P: AsRef<std::path::Path>>(path: P) -> Result<Vec<T>, std::io::Error> {
+pub fn from_csv<T: DeserializeOwned + Clone, P: AsRef<std::path::Path>>(
+    path: P,
+) -> Result<Vec<T>, std::io::Error> {
     let mut records = Vec::new();
     let file = std::fs::File::open(path)?;
     let mut rdr = csv::Reader::from_reader(file);

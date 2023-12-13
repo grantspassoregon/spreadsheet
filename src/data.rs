@@ -1,3 +1,4 @@
+//! The `data` module holds generic data structures for processing imported data.
 use crate::{error, import, utils};
 use indicatif::ProgressBar;
 use rayon::prelude::*;
@@ -131,7 +132,7 @@ impl IndustryCode {
             None => None,
         }
     }
-    
+
     /// The `tourism` function matches a subsector code to a string description of the tourism
     /// category associated with the subsector.  The categories generally describe the areas of
     /// interest for tourism, used for symbolizing business locations on the web viewer, and
@@ -200,12 +201,15 @@ impl IndustryCode {
         }
     }
 
+    /// The `from_code()` method creates an `IndustryCode` stuct by matching an industry code `code` against a known list of codes
+    /// `industry_codes`.
     pub fn from_code(code: i32, industry_codes: &IndustryCodes) -> Self {
         let industry = industry_codes
             .records_ref()
             .iter()
             .cloned()
             .filter(|r| r.code == code)
+            .take(1)
             .collect::<Vec<IndustryCode>>();
         industry[0].clone()
     }
@@ -279,7 +283,7 @@ impl From<&IndustryCode> for IndustryInfo {
 }
 
 /// The `IndustryInfos` struct holds a `records` field that contains a vector of type
-/// [`IndustryCode`].
+/// [`IndustryInfo`].
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct IndustryInfos {
     records: Vec<IndustryInfo>,
@@ -311,13 +315,15 @@ impl IndustryInfos {
 }
 
 /// The `Business` struct represents a business license for the City of Grants Pass.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, PartialOrd)]
 pub struct Business {
     company_name: String,
     contact_name: Option<String>,
     business_type: String,
     dba: Option<String>,
     license: String,
+    #[serde(rename = "CODENUMBER")]
+    code: i32,
     notes: Option<String>,
     created_user: Option<String>,
     created_date: Option<String>,
@@ -329,22 +335,35 @@ pub struct Business {
     y_coordinate: f64,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+impl Business {
+    /// The `code` field represents the NAICS industry code for the business.  This method returns
+    /// the value of the field.
+    pub fn code(&self) -> i32 {
+        self.code
+    }
+}
+
+/// The `Businesses` struct contains a `records` field holding a vector of type [`Business`].
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, PartialOrd)]
 pub struct Businesses {
     records: Vec<Business>,
 }
 
 impl Businesses {
+    /// Read the contents of a CSV file at location `path` into an `Businesses` struct.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
         let records = utils::from_csv(path)?;
         Ok(Businesses { records })
     }
 
+    /// The `records` field contains a vector of type [`Business`].  This function returns a
+    /// reference to the vector.
     pub fn records_ref(&self) -> &Vec<Business> {
         &self.records
     }
 }
 
+/// The `BusinessInfo` struct aggregates spatial business information with license info.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BusinessInfo {
     company_name: String,
@@ -369,6 +388,8 @@ pub struct BusinessInfo {
 }
 
 impl BusinessInfo {
+    /// Creates a new `BusinessInfo` from a [`Business`] struct, an [`ActiveLicenses`] struct, and
+    /// an [`IndustryCodes`] struct.
     pub fn from_license(
         business: &Business,
         licenses: &ActiveLicenses,
@@ -416,14 +437,64 @@ impl BusinessInfo {
             y_coordinate,
         }
     }
+
+    /// Creates a new `BusinessInfo` from a [`Business`] struct and
+    /// an [`IndustryCodes`] struct.
+    pub fn from_codes(business: &Business, codes: &IndustryCodes) -> Self {
+        let company_name = business.company_name.clone();
+        let contact_name = business.contact_name.clone();
+        let dba = business.dba.clone();
+        let street_address_label = business.street_address_label.clone();
+        let license = business.license.clone();
+        let industry_code = business.code();
+        let industry = IndustryCode::from_code(industry_code, codes);
+        let industry_name = industry.name.clone();
+        let sector_code = industry.sector_code();
+        let sector_name = industry.sector().clone();
+        let subsector_code = industry.subsector_code();
+        let subsector_name = industry.subsector();
+        let tourism = industry.tourism();
+        let notes = business.notes.clone();
+        let created_user = business.created_user.clone();
+        let created_date = business.created_date.clone();
+        let last_edited_user = business.last_edited_user.clone();
+        let last_edited_date = business.last_edited_date.clone();
+        let x_coordinate = business.x_coordinate;
+        let y_coordinate = business.y_coordinate;
+        BusinessInfo {
+            company_name,
+            contact_name,
+            dba,
+            street_address_label,
+            license,
+            industry_code,
+            industry_name,
+            sector_code,
+            sector_name,
+            subsector_code,
+            subsector_name,
+            tourism,
+            notes,
+            created_user,
+            created_date,
+            last_edited_user,
+            last_edited_date,
+            x_coordinate,
+            y_coordinate,
+        }
+    }
 }
 
+/// The `BusinessesInfo` struct contains a `records` field that holds a vector of type
+/// [`BusinessInfo`].
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BusinessesInfo {
     records: Vec<BusinessInfo>,
 }
 
 impl BusinessesInfo {
+    /// Creates a new `BusinessesInfo` from a [`Businesses`] struct, an [`ActiveLicenses`] struct, and
+    /// an [`IndustryCodes`] struct.
     pub fn from_license(
         businesses: &Businesses,
         licenses: &ActiveLicenses,
@@ -437,25 +508,33 @@ impl BusinessesInfo {
         BusinessesInfo { records }
     }
 
+    /// Read the contents of a CSV file at location `path` into an `BusinessesInfo` struct.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
         let records = utils::from_csv(path)?;
         Ok(BusinessesInfo { records })
     }
 
+    /// Write the contents of `BusinessesInfo` to a CSV file at location `title`.  Each element in
+    /// the vector of type [`BusinessInfo`] maps to a row of data on the CSV.
     pub fn to_csv(&mut self, title: std::path::PathBuf) -> Result<(), std::io::Error> {
         utils::to_csv(self.records_mut(), title)?;
         Ok(())
     }
 
+    /// The `records` field contains a vector of type [`BusinessInfo`].  This function returns a
+    /// reference to the vector.
     pub fn records_ref(&self) -> &Vec<BusinessInfo> {
         &self.records
     }
 
+    /// This function returns a mutable reference to the vector of type [`BusinessInfo`] in the
+    /// `records` field.
     pub fn records_mut(&mut self) -> &mut Vec<BusinessInfo> {
         &mut self.records
     }
 }
 
+/// Deprecated.  Industry code has been added to the [`Business`] struct.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ActiveLicense {
     #[serde(rename = "CodeNumber")]
@@ -465,30 +544,37 @@ pub struct ActiveLicense {
 }
 
 impl ActiveLicense {
+    /// Returns the cloned value of the `license` field.
     pub fn license(&self) -> String {
         self.license.clone()
     }
 
+    /// Returns a reference to the `license` field.
     pub fn license_ref(&self) -> &String {
         &self.license
     }
 }
 
+/// Deprecated.  Industry code has been added to the [`Business`] struct.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ActiveLicenses {
     records: Vec<ActiveLicense>,
 }
 
 impl ActiveLicenses {
+    /// The `records` field contains a vector of type [`ActiveLicense`].  This function returns a
+    /// reference to the vector.
     pub fn records_ref(&self) -> &Vec<ActiveLicense> {
         &self.records
     }
 
+    /// Read the contents of a CSV file at location `path` into an `ActiveLicenses` struct.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
         let records = utils::from_csv(path)?;
         Ok(ActiveLicenses { records })
     }
 
+    /// Returns the industry code for a business given a license number.
     pub fn code(&self, license: &str) -> i32 {
         let result = self
             .records_ref()
@@ -525,6 +611,7 @@ impl fmt::Display for FlatList {
     }
 }
 
+/// The `MailingListItem` struct holds the imported mailing data from a tax parcel.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MailingListItem {
     name: String,
@@ -537,6 +624,7 @@ pub struct MailingListItem {
 }
 
 impl MailingListItem {
+    /// Creates a new `MailingListItem` from an [`import::CityTaxlots`] struct.
     pub fn from_city_parcels(
         name: &str,
         parcels: &import::CityTaxlots,
@@ -592,12 +680,16 @@ impl MailingListItem {
     }
 }
 
+/// The `MailingList` struct contains a `records` field that holds a vector of type
+/// [`MailingListItem`].
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MailingList {
     records: Vec<MailingListItem>,
 }
 
 impl MailingList {
+    /// The `records` field contains a vector of type [`MailingListItem`].  This function returns a
+    /// reference to the vector.
     pub fn records_ref(&self) -> &Vec<MailingListItem> {
         &self.records
     }
@@ -630,6 +722,7 @@ impl TryFrom<&import::CityTaxlots> for MailingList {
     }
 }
 
+/// The `MailingListExportItem` struct holds mailing list data in export format.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MailingListExportItem {
     name: String,
@@ -655,29 +748,41 @@ impl From<&MailingListItem> for MailingListExportItem {
     }
 }
 
+/// The `MailingListExport` struct contains a `records` field that holds a vector of type
+/// [`MailingListExportItem`].
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MailingListExport {
     records: Vec<MailingListExportItem>,
 }
 
 impl MailingListExport {
+    /// Creates a new `MailingListExport` struct from a `records` vector of type
+    /// [`MailingListExportItem`]
     pub fn new(records: Vec<MailingListExportItem>) -> Self {
         MailingListExport { records }
     }
 
+    /// Write the contents of `MailingListExport` to a CSV file at location `title`.  Each element in
+    /// the vector of type [`MailingListExportItem`] maps to a row of data on the CSV.
     pub fn to_csv<P: AsRef<std::path::Path>>(&mut self, path: P) -> Result<(), error::Error> {
         utils::to_csv(self.records_mut(), path)?;
         Ok(())
     }
 
+    /// The `records` field contains a vector of type [`MailingListExportItem`].  This function returns a
+    /// reference to the vector.
     pub fn records_ref(&self) -> &Vec<MailingListExportItem> {
         &self.records
     }
 
+    /// This function returns a mutable reference to the vector of type [`MailingListExportItem`] in the
+    /// `records` field.
     pub fn records_mut(&mut self) -> &mut Vec<MailingListExportItem> {
         &mut self.records
     }
 
+    /// Sorts elements of `records` by `key`.  The `key` parameter takes the values "properties"
+    /// and "name".
     pub fn sort_by_key(&mut self, key: &str) {
         match key {
             "properties" => self.records.sort_by_key(|v| v.properties),

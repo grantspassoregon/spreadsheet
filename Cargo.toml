@@ -12,6 +12,7 @@ path = "src/main.rs"
 name = "spreadsheet"
 
 [dependencies]
+address = { path = "../address" }
 clap = { version = "4.1.1", features = ["derive"] }
 csv = "1.1.6"
 dotenv = "0.15.0"

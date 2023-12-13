@@ -1,8 +1,11 @@
+//! The `city_taxlot` submodule contains data structures associated with the city version of the
+//! county tax parcel GIS layer.
 use crate::utils;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use tracing::warn;
 
+/// The `CityTaxlot` struct holds fields from the city version of the county tax parcel files.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
 pub struct CityTaxlot {
@@ -62,10 +65,6 @@ pub struct CityTaxlot {
     sale_type: Option<String>,
     #[serde(rename = "SD")]
     school_district: String,
-    // #[serde(rename = "Shape_Area")]
-    // shape_area: f64,
-    // #[serde(rename = "Shape_Length")]
-    // shape_length: f64,
     situs: String,
     situs_city: String,
     situs_pref: Option<String>,
@@ -87,58 +86,78 @@ pub struct CityTaxlot {
 }
 
 impl CityTaxlot {
+    /// The `address` field represents the mailing address of a property owner.  This method
+    /// returns the cloned value of the field.
     pub fn address(&self) -> String {
         self.address.clone()
     }
 
+    /// This method returns a reference to the value of the `address` field.
     pub fn address_ref(&self) -> &String {
         &self.address
     }
 
+    /// The `csz` field represents the city, state and zip of the property situs address.  This
+    /// method returns the cloned value of the field.
     pub fn csz(&self) -> String {
         self.csz.clone()
     }
 
+    /// The `owner_name` field represents the name of the property owner.  This method returns the
+    /// cloned value of the field.
     pub fn owner_name(&self) -> String {
         self.owner_name.clone()
     }
 
+    /// The `map_number` field represents the map taxlot number of the parcel.  The `parcel()`
+    /// method returns the cloned value of the `map_number` field.
     pub fn parcel(&self) -> String {
         self.map_number.clone()
     }
 
+    /// The `situs` field represents the situs address of the property.  This method returns the
+    /// cloned value of the field.
     pub fn situs(&self) -> String {
         self.situs.clone()
     }
 
+    /// This method returns a reference to the `situs` field.
     pub fn situs_ref(&self) -> &String {
         &self.situs
     }
 }
 
+/// The `CityTaxlots` struct contains a `records` field that holds a vector of type [`CityTaxlot`].
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CityTaxlots {
     records: Vec<CityTaxlot>,
 }
 
 impl CityTaxlots {
+    /// Creates a new `CityTaxlots` struct from a CSV file located at `path`.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
         let records = utils::from_csv(path)?;
         Ok(CityTaxlots { records })
     }
 
+    /// The `records` field contains a vector of type [`CityTaxlot`].  This method returns the
+    /// cloned value of the field.
     pub fn records(&self) -> Vec<CityTaxlot> {
         self.records.clone()
     }
 
+    /// This method returns a reference to the `records` field.
     pub fn records_ref(&self) -> &Vec<CityTaxlot> {
         &self.records
     }
 
+    /// This method returns a mutable reference to the `records` field.
     pub fn records_mut(&mut self) -> &mut Vec<CityTaxlot> {
         &mut self.records
     }
 
+    /// The `addresses()` method returns the `address` field from each element of [`CityTaxlot`]
+    /// collected into a vector of type `String`.
     pub fn addresses(&self) -> Vec<String> {
         self.records_ref()
             .par_iter()
@@ -146,6 +165,8 @@ impl CityTaxlots {
             .collect::<Vec<String>>()
     }
 
+    /// The `owner_names()` method returns the `owner_name` field from each element of [`CityTaxlot`]
+    /// collected into a vector of type `String`.
     pub fn owner_names(&self) -> Vec<String> {
         self.records_ref()
             .par_iter()
@@ -153,6 +174,7 @@ impl CityTaxlots {
             .collect::<Vec<String>>()
     }
 
+    /// Returns a vector of unique addresses associated with a given property owner `name`.
     pub fn associated_addresses(&self, name: &str) -> Vec<String> {
         let mut res = self
             .records_ref()
@@ -168,6 +190,7 @@ impl CityTaxlots {
         res
     }
 
+    /// Returns a vector of unique owner names associated with a given address `address`.
     pub fn associated_names(&self, address: &str) -> Vec<String> {
         let mut res = self
             .records_ref()

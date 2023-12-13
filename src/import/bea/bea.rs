@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, time::Duration};
 use tracing::{info, trace};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, PartialOrd)]
 #[serde(rename_all = "PascalCase")]
 /// The `BeaDatumRaw` struct holds a record from the BEA website API before processing.
 pub struct BeaDatumRaw {
@@ -27,7 +27,7 @@ pub struct BeaDatumRaw {
     data_value: String,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, PartialOrd)]
 /// The `BeaDataRaw` struct contains a `records` field that holds a vector of type [`BeaDatumRaw`].
 pub struct BeaDataRaw {
     records: Vec<BeaDatumRaw>,
@@ -56,16 +56,16 @@ impl BeaDataRaw {
         bar.enable_steady_tick(Duration::from_millis(120));
         bar.set_style(
             ProgressStyle::with_template("{spinner:.blue} {msg}")
-            .unwrap()
-            .tick_strings(&[
-                "▹▹▹▹▹",
-                "▸▹▹▹▹",
-                "▹▸▹▹▹",
-                "▹▹▸▹▹",
-                "▹▹▹▸▹",
-                "▹▹▹▹▸",
-                "▪▪▪▪▪",
-            ]),
+                .unwrap()
+                .tick_strings(&[
+                    "▹▹▹▹▹",
+                    "▸▹▹▹▹",
+                    "▹▸▹▹▹",
+                    "▹▹▸▹▹",
+                    "▹▹▹▸▹",
+                    "▹▹▹▹▸",
+                    "▪▪▪▪▪",
+                ]),
         );
         bar.set_message("Loading...");
         let records = utils::from_csv(path)?;
@@ -74,7 +74,7 @@ impl BeaDataRaw {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, PartialOrd)]
 #[serde(rename_all = "PascalCase")]
 /// The `BeaDatum` struct holds data processed from a [`BeaDatumRaw`] struct.
 pub struct BeaDatum {
@@ -105,6 +105,18 @@ impl BeaDatum {
         self.geo_fips
     }
 
+    /// The `geo_name` field represents the FIPS description of the datum.  This function returns the
+    /// value of the field.
+    pub fn geo_name(&self) -> String {
+        self.geo_name.clone()
+    }
+
+    /// The `geo_name` field represents the FIPS description of the datum.  This function returns a reference to the
+    /// value of the field.
+    pub fn geo_name_ref(&self) -> &String {
+        &self.geo_name
+    }
+
     /// The `time_period` field represents the year of the datum.  This function returns the value
     /// of the field.
     pub fn time_period(&self) -> i32 {
@@ -119,7 +131,7 @@ impl BeaDatum {
 }
 
 /// The `BeaData` struct holds BEA data processed into library form.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, PartialOrd)]
 pub struct BeaData {
     records: Vec<BeaDatum>,
 }
@@ -143,7 +155,24 @@ impl BeaData {
 
     /// This method loads a `BeaData` from a CSV located at `path`.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
+        let bar = ProgressBar::new_spinner();
+        bar.enable_steady_tick(Duration::from_millis(120));
+        bar.set_style(
+            ProgressStyle::with_template("{spinner:.blue} {msg}")
+                .unwrap()
+                .tick_strings(&[
+                    "▹▹▹▹▹",
+                    "▸▹▹▹▹",
+                    "▹▸▹▹▹",
+                    "▹▹▸▹▹",
+                    "▹▹▹▸▹",
+                    "▹▹▹▹▸",
+                    "▪▪▪▪▪",
+                ]),
+        );
+        bar.set_message("Loading...");
         let records = utils::from_csv(path)?;
+        bar.finish_with_message("Loaded!");
         Ok(BeaData { records })
     }
 
@@ -190,6 +219,17 @@ impl BeaData {
         keys
     }
 
+    /// This function returns a HashMap of geofips keys and description values.
+    pub fn geofips_hash(&self) -> HashMap<i32, String> {
+        let mut hash = HashMap::new();
+        for record in self.records_ref() {
+            if !hash.contains_key(&record.geo_fips()) {
+                hash.insert(record.geo_fips(), record.geo_name());
+            }
+        }
+        hash
+    }
+
     /// This function returns unique year values from the `records` vector.
     pub fn time_period_keys(&self) -> Vec<i32> {
         let mut keys = self
@@ -200,6 +240,34 @@ impl BeaData {
         keys.sort();
         keys.dedup();
         keys
+    }
+
+    pub fn filter(&self, filter: &str, test: &str) -> Self {
+        info!("Calling filter on {} records.", self.records_ref().len());
+        let mut records = Vec::new();
+        match filter {
+            "year" => {
+                tracing::info!("Filtering by year {}", test);
+                records.append(&mut self.records_ref().iter().filter(|d| format!("{}", d.time_period()).as_str() == test).cloned().collect::<Vec<BeaDatum>>())
+            },
+            "code" => {
+                tracing::info!("Filtering by code {}", test);
+                records.append(&mut self.records_ref().iter().filter(|d| d.code() == test).cloned().collect::<Vec<BeaDatum>>())
+            },
+            "fips" => {
+                tracing::info!("Filtering by fips {}", test);
+                records.append(&mut self.records_ref().iter().filter(|d| format!("{}", d.geo_fips()).as_str() == test).cloned().collect::<Vec<BeaDatum>>())
+            },
+            _ => tracing::warn!("Invalid filter provided."),
+        }
+        Self { records }
+    }
+
+    pub fn search(&self, year: &str, code: &str, fips: &str) -> Self {
+        info!("Calling search.");
+        self.filter("year", year)
+            .filter("code", code)
+            .filter("fips", fips)
     }
 }
 
@@ -247,12 +315,16 @@ impl TryFrom<BeaDataRaw> for BeaData {
     }
 }
 
+impl From<Vec<BeaDatum>> for BeaData {
+    fn from(records: Vec<BeaDatum>) -> Self {
+        tracing::info!("Calling From for BeaData.");
+        Self { records }
+    }
+}
+
 /// This functions removes commas and note tags (trailing 'E's) from BEA values.  Called by
 /// ['str_to_int'].
-fn remove_comma<'a, 'b>(
-    value: &'a str,
-    num: Option<String>,
-) -> IResult<&'a str, Option<String>> {
+fn remove_comma<'a, 'b>(value: &'a str, num: Option<String>) -> IResult<&'a str, Option<String>> {
     let mut res = "".to_string();
     let mut out = None;
     if let Some(val) = num {
