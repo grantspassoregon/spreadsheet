@@ -5,7 +5,6 @@
 )]
 #![doc(html_playground_url = "https://play.rust-lang.org/")]
 pub mod data;
-pub mod error;
 pub mod import;
 pub mod utils;
 
@@ -15,7 +14,6 @@ pub mod prelude {
         ActiveLicense, ActiveLicenses, Business, BusinessInfo, Businesses, BusinessesInfo,
         MailingList, MailingListExport, MailingListExportItem, MailingListItem,
     };
-    pub use crate::error::{Error, SheetResult};
     pub use crate::import::{
         BeaData, BeaDataRaw, BeaDatum, BeaDatumRaw, CityTaxlot, CityTaxlots, CountyTaxlot,
         CountyTaxlots, JcSurvey,

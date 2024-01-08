@@ -1,6 +1,6 @@
+use aid::prelude::*;
+use spreadsheet::prelude::*;
 use spreadsheet::data::*;
-use spreadsheet::error;
-use spreadsheet::import::*;
 use tracing::{info, trace};
 
 #[test]
@@ -11,7 +11,7 @@ fn load_industry_codes() -> Result<(), std::io::Error> {
     {};
     trace!("Subscriber initialized.");
 
-    let file_path = "c:/users/erose/documents/business_categories.csv";
+    let file_path = "./tests/test_data/business_categories.csv";
     let records = IndustryCodes::from_csv(file_path)?;
     info!("Records: {:?}", records.records_ref().len());
 
@@ -26,11 +26,11 @@ fn write_industry_info() -> Result<(), std::io::Error> {
     {};
     trace!("Subscriber initialized.");
 
-    let file_path = "c:/users/erose/documents/business_categories.csv";
+    let file_path = "./tests/test_data/business_categories.csv";
     let records = IndustryCodes::from_csv(file_path)?;
     info!("Records: {:?}", records.records_ref().len());
     let mut industry_info = IndustryInfos::from(&records);
-    industry_info.to_csv("c:/users/erose/documents/industry_info.csv".into())?;
+    industry_info.to_csv("./tests/test_data/industry_info.csv".into())?;
 
     Ok(())
 }
@@ -58,7 +58,7 @@ fn load_licenses() -> Result<(), std::io::Error> {
     {};
     trace!("Subscriber initialized.");
 
-    let file_path = "c:/users/erose/documents/active_business.csv";
+    let file_path = "./tests/test_data/active_business.csv";
     let records = ActiveLicenses::from_csv(file_path)?;
     info!("Records: {:?}", records.records_ref().len());
 
@@ -73,7 +73,7 @@ fn license_code() -> Result<(), std::io::Error> {
     {};
     trace!("Subscriber initialized.");
 
-    let file_path = "c:/users/erose/documents/active_business.csv";
+    let file_path = "./tests/test_data/active_business.csv";
     let records = ActiveLicenses::from_csv(file_path)?;
     info!("Records: {:?}", records.records_ref().len());
     let license = records.records_ref()[0].license();
@@ -91,15 +91,15 @@ fn businesses_info() -> Result<(), std::io::Error> {
     {};
     trace!("Subscriber initialized.");
 
-    let file_path = "c:/users/erose/documents/active_business.csv";
+    let file_path = "./tests/test_data/active_business.csv";
     let licenses = ActiveLicenses::from_csv(file_path)?;
-    let file_path = "c:/users/erose/documents/business_categories.csv";
+    let file_path = "./test_data/business_categories.csv";
     let codes = IndustryCodes::from_csv(file_path)?;
     let file_path = "c:/users/erose/documents/businesses_export.csv";
     let businesses = Businesses::from_csv(file_path)?;
     let mut businesses_info = BusinessesInfo::from_license(&businesses, &licenses, &codes);
     info!("Records: {:?}", businesses_info.records_ref().len());
-    businesses_info.to_csv("c:/users/erose/documents/businesses_import.csv".into())?;
+    businesses_info.to_csv("./test_data/businesses_import.csv".into())?;
     info!("Businesses info written to csv.");
 
     Ok(())
@@ -112,7 +112,7 @@ fn load_county_taxlots() -> Result<(), std::io::Error> {
         .try_init()
     {};
     trace!("Subscriber initialized.");
-    let file_path = "c:/users/erose/documents/taxlots_zto_county.csv";
+    let file_path = "./tests/test_data/county_parcels.csv";
     let lots = CountyTaxlots::from_csv(file_path)?;
     info!("Records: {:?}", lots.records_ref().len());
 
@@ -120,7 +120,7 @@ fn load_county_taxlots() -> Result<(), std::io::Error> {
 }
 
 #[test]
-fn convert_raw_bea() -> Result<(), error::Error> {
+fn convert_raw_bea() -> Clean<()> {
     if let Ok(()) = tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
         .try_init()
@@ -138,7 +138,7 @@ fn convert_raw_bea() -> Result<(), error::Error> {
 }
 
 #[test]
-fn print_code_keys() -> Result<(), error::Error> {
+fn print_code_keys() -> Clean<()> {
     if let Ok(()) = tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
         .try_init()
@@ -156,9 +156,9 @@ fn print_code_keys() -> Result<(), error::Error> {
     keys.sort();
     keys.dedup();
     let mut wtr =
-        csv::Writer::from_path("c:/users/erose/documents/bea/bea_cainc5n_code_keys.csv").unwrap();
+        csv::Writer::from_path("c:/users/erose/documents/bea/bea_cainc5n_code_keys.csv")?;
     for key in keys {
-        wtr.serialize(key).unwrap();
+        wtr.serialize(key)?;
     }
     wtr.flush()?;
     Ok(())

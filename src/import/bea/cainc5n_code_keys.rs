@@ -139,6 +139,7 @@ pub enum Cainc5nCodeKey {
     CAINC5N_907,
 }
 
+#[allow(dead_code)]
 /// Matches the string representation of a CAINC5N code key with the corresponding variant of enum
 /// [`Cainc5nCodeKey`].
 pub fn match_code_key(input: &str) -> Option<Cainc5nCodeKey> {
@@ -278,6 +279,7 @@ pub fn match_code_key(input: &str) -> Option<Cainc5nCodeKey> {
     }
 }
 
+#[allow(dead_code)]
 /// Deserialization function for CAINC5N code keys.
 pub fn deserialize_code_keys<'de, D: Deserializer<'de>>(de: D) -> Result<Cainc5nCodeKey, D::Error> {
     let intermediate = Deserialize::deserialize(de)?;

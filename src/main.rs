@@ -1,3 +1,4 @@
+use aid::prelude::*;
 use address::prelude::*;
 use clap::Parser;
 use spreadsheet::prelude::*;
@@ -37,7 +38,7 @@ Command to execute, including:
 * load_parcels <PATH> -> Load taxlots from a CSV.
 ";
 
-fn main() -> SheetResult<()> {
+fn main() -> Clean<()> {
     if let Ok(()) = tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
         .try_init()
@@ -68,7 +69,8 @@ fn main() -> SheetResult<()> {
         }
         "load_parcels" => {
             if let Some(path) = cli.source {
-                let records = CityTaxlots::from_csv(path)?;
+                info!("Importing county taxlots.");
+                let records = CountyTaxlots::from_csv(path)?;
                 info!("Records: {}", records.records_ref().len());
                 let mail = MailingList::try_from(&records)?;
                 info!("Records processed: {}", mail.records_ref().len());
@@ -77,7 +79,10 @@ fn main() -> SheetResult<()> {
                 let mail: Vec<MailingListExportItem> =
                     mail.records_ref().iter().rev().cloned().collect();
                 let mut mail = MailingListExport::new(mail);
-                mail.to_csv("c:/users/erose/documents/mailing_list.csv")?;
+                if let Some(file) = cli.target {
+                    mail.to_csv(&file)?;
+                    info!("Mailing list output to {}", &file.display());
+                }
             }
         }
         "jc_survey" => {

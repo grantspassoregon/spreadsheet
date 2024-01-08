@@ -1,5 +1,6 @@
 //! The `data` module holds generic data structures for processing imported data.
-use crate::{error, import, utils};
+use crate::prelude::*;
+use aid::prelude::*;
 use indicatif::ProgressBar;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -57,10 +58,11 @@ impl IndustryCode {
             92 => Some("Public Administration"),
             _ => None,
         };
-        match sector {
-            Some(value) => Some(value.to_string()),
-            None => None,
-        }
+        // match sector {
+        //     Some(value) => Some(value.to_string()),
+        //     None => None,
+        // }
+        sector.map(|value| value.to_string())
     }
 
     /// The NAICS subsector code is the first four digits of the Industry Code.  This function
@@ -127,10 +129,11 @@ impl IndustryCode {
             7225 => Some("Restaurants and Other Eating Places"),
             _ => None,
         };
-        match subsector {
-            Some(value) => Some(value.to_string()),
-            None => None,
-        }
+        // match subsector {
+        //     Some(value) => Some(value.to_string()),
+        //     None => None,
+        // }
+        subsector.map(|value| value.to_string())
     }
 
     /// The `tourism` function matches a subsector code to a string description of the tourism
@@ -195,10 +198,11 @@ impl IndustryCode {
             812113 => Some("Salon"),
             _ => tourism,
         };
-        match tourism {
-            Some(value) => Some(value.to_string()),
-            None => None,
-        }
+        // match tourism {
+        //     Some(value) => Some(value.to_string()),
+        //     None => None,
+        // }
+        tourism.map(|value| value.to_string())
     }
 
     /// The `from_code()` method creates an `IndustryCode` stuct by matching an industry code `code` against a known list of codes
@@ -207,9 +211,9 @@ impl IndustryCode {
         let industry = industry_codes
             .records_ref()
             .iter()
-            .cloned()
             .filter(|r| r.code == code)
             .take(1)
+            .cloned()
             .collect::<Vec<IndustryCode>>();
         industry[0].clone()
     }
@@ -231,7 +235,7 @@ impl IndustryCodes {
 
     /// Read the contents of a CSV file at location `path` into an `IndustryCodes` struct.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
-        let records = utils::from_csv(path)?;
+        let records = from_csv(path)?;
         Ok(IndustryCodes { records })
     }
 }
@@ -303,7 +307,7 @@ impl IndustryInfos {
     /// Write the contents of `IndustryInfos` to a CSV file at location `title`.  Each element in
     /// the vector of type [`IndustryInfo`] maps to a row of data on the CSV.
     pub fn to_csv(&mut self, title: std::path::PathBuf) -> Result<(), std::io::Error> {
-        utils::to_csv(self.records_mut(), title)?;
+        to_csv(self.records_mut(), title)?;
         Ok(())
     }
 
@@ -352,7 +356,7 @@ pub struct Businesses {
 impl Businesses {
     /// Read the contents of a CSV file at location `path` into an `Businesses` struct.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
-        let records = utils::from_csv(path)?;
+        let records = from_csv(path)?;
         Ok(Businesses { records })
     }
 
@@ -510,14 +514,14 @@ impl BusinessesInfo {
 
     /// Read the contents of a CSV file at location `path` into an `BusinessesInfo` struct.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
-        let records = utils::from_csv(path)?;
+        let records = from_csv(path)?;
         Ok(BusinessesInfo { records })
     }
 
     /// Write the contents of `BusinessesInfo` to a CSV file at location `title`.  Each element in
     /// the vector of type [`BusinessInfo`] maps to a row of data on the CSV.
     pub fn to_csv(&mut self, title: std::path::PathBuf) -> Result<(), std::io::Error> {
-        utils::to_csv(self.records_mut(), title)?;
+        to_csv(self.records_mut(), title)?;
         Ok(())
     }
 
@@ -570,7 +574,7 @@ impl ActiveLicenses {
 
     /// Read the contents of a CSV file at location `path` into an `ActiveLicenses` struct.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
-        let records = utils::from_csv(path)?;
+        let records = from_csv(path)?;
         Ok(ActiveLicenses { records })
     }
 
@@ -579,8 +583,8 @@ impl ActiveLicenses {
         let result = self
             .records_ref()
             .iter()
-            .cloned()
             .filter(|r| r.license == license)
+            .cloned()
             .collect::<Vec<ActiveLicense>>();
         if result.is_empty() {
             error!("Could not process license {:?}", license);
@@ -605,7 +609,7 @@ impl fmt::Display for FlatList {
             if i > 0 {
                 flat.push_str(", ");
             }
-            flat.push_str(&item);
+            flat.push_str(item);
         }
         write!(f, "{}", flat)
     }
@@ -627,9 +631,9 @@ impl MailingListItem {
     /// Creates a new `MailingListItem` from an [`import::CityTaxlots`] struct.
     pub fn from_city_parcels(
         name: &str,
-        parcels: &import::CityTaxlots,
+        parcels: &CityTaxlots,
         done: &mut std::collections::HashSet<String>,
-    ) -> Result<Self, error::Error> {
+    ) -> Clean<Self> {
         done.insert(name.to_string());
         let addr = parcels.associated_addresses(name);
         if !addr.is_empty() {
@@ -675,9 +679,65 @@ impl MailingListItem {
                 parcels: FlatList::new(tax_parcels),
             })
         } else {
-            Err(error::Error::UnknownError)
+            Err(Bandage::Unknown)
         }
     }
+
+    /// Creates a new `MailingListItem` from an [`import::CountyTaxlots`] struct.
+    pub fn from_county_parcels(
+        name: &str,
+        parcels: &CountyTaxlots,
+        done: &mut std::collections::HashSet<String>,
+    ) -> Clean<Self> {
+        done.insert(name.to_string());
+        let addr = parcels.associated_addresses(name);
+        if !addr.is_empty() {
+            let mut csz = parcels
+                .records_ref()
+                .iter()
+                .filter(|v| addr.contains(v.address_ref()))
+                .map(|v| v.csz())
+                .collect::<Vec<String>>();
+            csz.sort();
+            csz.dedup();
+            let mailing = &addr[0];
+            let names = parcels.associated_names(mailing);
+            for i in &names {
+                if !done.contains(i) {
+                    done.insert(i.to_string());
+                }
+            }
+            let names = names
+                .par_iter()
+                .filter(|v| *v != name)
+                .map(|v| v.to_string())
+                .collect::<Vec<String>>();
+            let situs = parcels
+                .records_ref()
+                .par_iter()
+                .filter(|v| v.address_ref() == mailing)
+                .map(|v| v.situs())
+                .collect::<Vec<String>>();
+            let tax_parcels = parcels
+                .records_ref()
+                .par_iter()
+                .filter(|v| situs.contains(v.situs_ref()))
+                .map(|v| v.parcel())
+                .collect::<Vec<String>>();
+            Ok(MailingListItem {
+                name: name.to_string(),
+                properties: situs.len(),
+                situs_addresses: FlatList::new(situs),
+                mailing_address: FlatList::new(addr),
+                mailing_csz: FlatList::new(csz),
+                associated_names: FlatList::new(names),
+                parcels: FlatList::new(tax_parcels),
+            })
+        } else {
+            Err(Bandage::Unknown)
+        }
+    }
+
 }
 
 /// The `MailingList` struct contains a `records` field that holds a vector of type
@@ -695,9 +755,9 @@ impl MailingList {
     }
 }
 
-impl TryFrom<&import::CityTaxlots> for MailingList {
-    type Error = error::Error;
-    fn try_from(parcels: &import::CityTaxlots) -> Result<Self, error::Error> {
+impl TryFrom<&CityTaxlots> for MailingList {
+    type Error = Bandage;
+    fn try_from(parcels: &CityTaxlots) -> Clean<Self> {
         info!("Importing from city parcels.");
         let style = indicatif::ProgressStyle::with_template(
             "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {'Importing city parcels...'}",
@@ -713,6 +773,33 @@ impl TryFrom<&import::CityTaxlots> for MailingList {
         for name in names {
             if !done.contains(&name) {
                 records.push(MailingListItem::from_city_parcels(
+                    &name, parcels, &mut done,
+                )?);
+            }
+            bar.inc(1);
+        }
+        Ok(MailingList { records })
+    }
+}
+
+impl TryFrom<&CountyTaxlots> for MailingList {
+    type Error = Bandage;
+    fn try_from(parcels: &CountyTaxlots) -> Clean<Self> {
+        info!("Importing from county parcels.");
+        let style = indicatif::ProgressStyle::with_template(
+            "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {'Importing county parcels...'}",
+        )
+        .unwrap();
+        let mut names = parcels.owner_names();
+        names.sort();
+        names.dedup();
+        let bar = ProgressBar::new(names.len() as u64);
+        bar.set_style(style);
+        let mut records = Vec::new();
+        let mut done = std::collections::HashSet::new();
+        for name in names {
+            if !done.contains(&name) {
+                records.push(MailingListItem::from_county_parcels(
                     &name, parcels, &mut done,
                 )?);
             }
@@ -764,8 +851,8 @@ impl MailingListExport {
 
     /// Write the contents of `MailingListExport` to a CSV file at location `title`.  Each element in
     /// the vector of type [`MailingListExportItem`] maps to a row of data on the CSV.
-    pub fn to_csv<P: AsRef<std::path::Path>>(&mut self, path: P) -> Result<(), error::Error> {
-        utils::to_csv(self.records_mut(), path)?;
+    pub fn to_csv<P: AsRef<std::path::Path>>(&mut self, path: P) -> Clean<()> {
+        to_csv(self.records_mut(), path)?;
         Ok(())
     }
 
@@ -797,7 +884,7 @@ impl From<&MailingList> for MailingListExport {
         let records = items
             .records_ref()
             .iter()
-            .map(|v| MailingListExportItem::from(v))
+            .map(MailingListExportItem::from)
             .collect::<Vec<MailingListExportItem>>();
         MailingListExport { records }
     }

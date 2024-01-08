@@ -1,0 +1,371 @@
+industry_code,industry_name,industry_description,sector_code,sector_name,subsector_code,subsector_name,tourism
+321999,Manufacturing-Wood Products,Manufacturing-Wood Products,32,Manufacturing,3219,Unknown,Unknown
+813211,Grantmaking Foundation,Grantmaking Foundation,81,Other Services (except Public Administration),8132,Unknown,Unknown
+811192,Car Wash & Detailing,Car Wash & Detailing,81,Other Services (except Public Administration),8111,Unknown,Unknown
+812220,Cemetery/Crematory,Cemetery/Crematory,81,Other Services (except Public Administration),8122,Unknown,Unknown
+541860,Advertising-Direct Mail,Advertising-Direct Mail,54,"Professional, Scientific and Technical Services",5418,Unknown,Unknown
+562112,Waste Collection-Hazardous,Waste Collection-Hazardous,56,"Administrative, Support and Waste Services",5621,Unknown,Unknown
+562111,Waste Collection-Solid,Waste Collection-Solid,56,"Administrative, Support and Waste Services",5621,Unknown,Unknown
+339913,Jewelers' Materials and Lapidary Work,Jewelers' Materials and Lapidary Work,33,Manufacturing,3399,Unknown,Unknown
+441110,Auto-New Car Dealer,Auto-New Car Dealer,44,Retail Trade,4411,Automobile Dealers,Shopping
+811490,GUNSMITHING,GUNSMITHING,81,Other Services (except Public Administration),8114,Unknown,Unknown
+811122,Auto-Glass Replacement Shop,Auto-Glass Replacement Shop,81,Other Services (except Public Administration),8111,Unknown,Unknown
+332510,Manufacturing-Hardware,Manufacturing-Hardware,33,Manufacturing,3325,Unknown,Unknown
+811121,"Auto-Body, Paint & Interior","Auto-Body, Paint & Interior",81,Other Services (except Public Administration),8111,Unknown,Unknown
+515210,TV-Cable & Subscribing Programs,TV-Cable & Suscribing Programs,51,Information,5152,Unknown,Unknown
+711120,Dance Studio,Dance Studio,71,"Arts, Entertainment and Recreation",7111,Performing Arts Companies,Entertainment
+541211,Accountant-CPA,Accountant-CPA,54,"Professional, Scientific and Technical Services",5412,Unknown,Unknown
+451130,Retail-Fabric Shop,Retail-Fabric Shop,45,Retail Trade,4511,"Sporting Goods, Hobby and Musical Instrument Stores",Shopping
+448150,Retail-Clothing & Accessories,Retail-Clothing & Accessories,44,Retail Trade,4481,Clothing Stores,Clothing & Accessories
+237990,Const-Heavy & Civil Engineering,Const-Heavy & Civil Engineering,23,Construction,2379,Unknown,Unknown
+721199,All Other Traveler Accommodation,"AirBNB, VRBO, Vacation Rental",72,Accommodation and Food Services,7211,Traveler Accommodation,Accommodation
+722330,Food-Mobile/Ice Cream Truck,Food-Mobile/Ice Cream Truck,72,Accommodation and Food Services,7223,Special Food Services,Food & Drink
+425120,Wholesale Agent,Wholesale Agent,42,Wholesale Trade,4251,Unknown,Unknown
+423930,Automotive Part Recycling,Recyclable Material Merchant,42,Wholesale Trade,4239,Unknown,Unknown
+451211,Retail-Book Store,Retail-Book Store,45,Retail Trade,4512,Book Stores and News Dealers,Shopping
+112990,Farming-Animals,Farming-Animals,11,"Agriculture, Forestry, Fishing and Hunting",1129,Unknown,Unknown
+561730,Yard Services,Yard Services,56,"Administrative, Support and Waste Services",5617,Unknown,Unknown
+621112,Medical-Mental Health Specialist,Medical-Mental Health Specialist,62,Health Care and Social Assistance,6211,Unknown,Unknown
+238110,Contractor-Concrete/Found/Structural,Contractor-Concrete/Found/Structural,23,Construction,2381,Unknown,Unknown
+238160,Roofing,Roofing,23,Construction,2381,Unknown,Unknown
+485991,Transportation-Special Needs,Transportation-Special Needs,48,Transportation and Warehousing,4859,Unknown,Unknown
+561790,Gutter Cleaning Service,Gutter Cleaning Service,56,"Administrative, Support and Waste Services",5617,Unknown,Unknown
+114210,Hunting & Trapping,Hunting & Trapping,11,"Agriculture, Forestry, Fishing and Hunting",1142,Unknown,Unknown
+541200,Other Accounting Services,"Accounting, Tax Prep, Bookkeeping, and Payroll",54,"Professional, Scientific and Technical Services",5412,Unknown,Unknown
+238910,Excavation - Site Preparation,Wrecking-Structural,23,Construction,2389,Unknown,Unknown
+441120,Auto-Used Car Dealer,Auto-Used Car Dealer,44,Retail Trade,4411,Automobile Dealers,Shopping
+541940,Veterinary,Veterinary,54,"Professional, Scientific and Technical Services",5419,Unknown,Unknown
+561710,Pest Control,Pest Control,56,"Administrative, Support and Waste Services",5617,Unknown,Unknown
+541810,Advertising Agency,Advertising Agency,54,"Professional, Scientific and Technical Services",5418,Unknown,Unknown
+532120,Rental-Truck & RV Rentals,Rental-Truck & RV Rentals,53,Real Estate Rental and Leasing,5321,Unknown,Unknown
+451212,Retail-Newsstand,Retail-Newsstand,45,Retail Trade,4512,Book Stores and News Dealers,Shopping
+52411,"Direct Life, Health, and Insurance",Insurance Sales,52,Finance and Insurance,5241,Unknown,Unknown
+812199,Personal Care Services,Personal Care Services,81,Other Services (except Public Administration),8121,Unknown,Unknown
+713210,Casino/Gambling Facility,Casino/Gambling Facility,71,"Arts, Entertainment and Recreation",7132,Gambling Industries,Entertainment
+512131,Movie Theater,Movie Theater,51,Information,5121,Unknown,Unknown
+238990,Specialty Trade Contractor,Specialty Trade Contractor,23,Construction,2389,Unknown,Unknown
+515120,TV-Television Broadcasting,TV-Television Broadcasting,51,Information,5151,Unknown,Unknown
+447190,Gas Station,Gas Station,44,Retail Trade,4471,Gasoline Stations,Gas
+621399,Offices of All Other Miscellaneous Health Practitioners,Medical Office,62,Health Care and Social Assistance,6213,Unknown,Unknown
+238220,Irrigation & Sprinkler Systems,Irrigation & Sprinkler Systems Maintenance and Installation,23,Construction,2382,Unknown,Unknown
+561990,Estate Liquidation Service,Estate Liquidation Service,56,"Administrative, Support and Waste Services",5619,Unknown,Unknown
+213111,Drilling Oil & Gass Wells,Drilling Oil & Gas Wells,21,Mining,2131,Unknown,Unknown
+454390,Christmas Tree Lot,Christmas Tree Lot,45,Retail Trade,4543,Direct Selling Establishments,Shopping
+532210,Rental-Electronic/Appliance Rentals,Rental-Electronic/Appliance Rentals,53,Real Estate Rental and Leasing,5322,Unknown,Unknown
+541820,Public Relations Agency,Public Relations Agency,54,"Professional, Scientific and Technical Services",5418,Unknown,Unknown
+812990,Personal Development/Alternative Spiritual Guidance,Personal Development/Alternative Spiritual Guidance,81,Other Services (except Public Administration),8129,Unknown,Unknown
+811420,Furniture/Reupholstery Repair,Furniture/Reupholstery Repair,81,Other Services (except Public Administration),8114,Unknown,Unknown
+446191,Retail-Optical Goods,Retail-Optical Goods,44,Retail Trade,4461,Health and Personal Care Stores,Shopping
+561421,Answering Service,Answering Service,56,"Administrative, Support and Waste Services",5614,Unknown,Unknown
+314999,Manufacturing-Textile,Manufacturing-Textile,31,Manufacturing,3149,Unknown,Unknown
+812199,Tattoo/Piercing Shop,Tattoo/Piercing Shop,81,Other Services (except Public Administration),8121,Unknown,Unknown
+525990,Finance-Misc Finance,Finance-Misc Finance,52,Finance and Insurance,5259,Unknown,Unknown
+562212,Waste Landfill,Waste Landfill,56,"Administrative, Support and Waste Services",5622,Unknown,Unknown
+238990,Contractor-Trade/Specialty,Contractor-Trade/Specialty,23,Construction,2389,Unknown,Unknown
+238350,Contractor - Carpentry,Carpentry Work,23,Construction,2383,Unknown,Unknown
+712130,Zoo/Botanical Garden,Zoo/Botanical Garden,71,"Arts, Entertainment and Recreation",7121,"Museums, Historical Sites and Similar Institutions",Entertainment
+445110,Food-Grocery Store,Food-Grocery Store,44,Retail Trade,4451,Grocery Stores,Grocery Stores
+621910,Medical-Ambulance,Medical-Ambulance,62,Health Care and Social Assistance,6219,Unknown,Unknown
+445110,Food-Deli,Food-Deli,44,Retail Trade,4451,Grocery Stores,Grocery Stores
+611310,Education-College/University/Prof School,Education-College/University/Prof School,61,Educational Services,6113,Unknown,Unknown
+443142,Retail-Electronics,Retail-Electronics,44,Retail Trade,4431,Electronics and Appliance Stores,Shopping
+811111,Auto-General Repair,Auto-General Repair,81,Other Services (except Public Administration),8111,Unknown,Unknown
+531320,Real Estate Appraisal & Sales,Real Estate Appraisal & Sales,53,Real Estate Rental and Leasing,5313,Unknown,Unknown
+238210,Contractor-Electrical,Contractor-Electrical,23,Construction,2382,Unknown,Unknown
+611110,Education-Elementary & Secondary,Education-Elementary & Secondary,61,Educational Services,6111,Unknown,Unknown
+114119,Fishing,Fishing,11,"Agriculture, Forestry, Fishing and Hunting",1141,Unknown,Unknown
+813910,Business Association,Busniess Association,81,Other Services (except Public Administration),8139,Unknown,Unknown
+523991,Title/Escrow Company,Title/Escrow Company,52,Finance and Insurance,5239,Unknown,Unknown
+621420,Medical-Mental Health/Substance Abuse Center,Medical-Mental Health/Substance Abuse Center,62,Health Care and Social Assistance,6214,Unknown,Unknown
+561311,Employment Agency,Employment Agency,56,"Administrative, Support and Waste Services",5613,Unknown,Unknown
+445299,Food-Specialty Food Store,Food-Specialty Food Store,44,Retail Trade,4452,Specialty Food Stores,Grocery Stores
+541519,Computer Services,Computer Services,54,"Professional, Scientific and Technical Services",5415,Unknown,Unknown
+611511,Beauty School,Beauty School,61,Educational Services,6115,Unknown,Unknown
+711190,Performing Arts Company,Performing Arts Company,71,"Arts, Entertainment and Recreation",7111,Performing Arts Companies,Entertainment
+531236,Real Estate Development & Construction,Unimproved Real Estate Development,53,Real Estate Rental and Leasing,5312,Unknown,Unknown
+624410,Child Day Care,Child Day Care,62,Health Care and Social Assistance,6244,Unknown,Unknown
+561422,Telemarketing,Telemarketing,56,"Administrative, Support and Waste Services",5614,Unknown,Unknown
+712120,Historical Site,Historical Site,71,"Arts, Entertainment and Recreation",7121,"Museums, Historical Sites and Similar Institutions",Entertainment
+524291,Finance-Claims Adjusting,Finance-Claims Adjusting,52,Finance and Insurance,5242,Unknown,Unknown
+561110,Administration-Office,Administration-Office,56,"Administrative, Support and Waste Services",5611,Unknown,Unknown
+711212,Racetrack,Racetrack,71,"Arts, Entertainment and Recreation",7112,Spectator Sports,Entertainment
+312140,Distillery,Distilleries,31,Manufacturing,3121,Unknown,Unknown
+113310,Logging,Logging,11,"Agriculture, Forestry, Fishing and Hunting",1133,Unknown,Unknown
+238290,Satellite Installation,Satellite Installation,23,Construction,2382,Unknown,Unknown
+621340,Physical Therapy,Physical Therapy,62,Health Care and Social Assistance,6213,Unknown,Unknown
+453991,Retail-Tobacco Store,Retail-Tobacco Store,45,Retail Trade,4539,Other Miscellaneous Store Retailers,Shopping
+561730,Tree Services,"Bracing, Planting, Pruning, Removal and Surgery",56,"Administrative, Support and Waste Services",5617,Unknown,Unknown
+524210,Insurance Agency & Brokerages,Insurance Agency & Brokerages,52,Finance and Insurance,5242,Unknown,Unknown
+623110,Medical-Nursing Care Facility,Medical-Nursing Care Facility,62,Health Care and Social Assistance,6231,Unknown,Unknown
+445310,Liquor Store,Liquor Store,44,Retail Trade,4453,"Beer, Wine and Liquor Stores","Beer, Wine & Liquor Stores"
+522110,Finance-Commercial Bank,Finance-Commercial Bank,52,Finance and Insurance,5221,Unknown,Bank
+812113,Nail Salon,Nail Salon,81,Other Services (except Public Administration),8121,Unknown,Salon
+493110,Storage & General Warehousing,Storage & General Warehousing,49,Transportation and Warehousing,4931,Unknown,Unknown
+492210,Delivery Service-Local,Delivery Service-Local,49,Transportation and Warehousing,4922,Unknown,Unknown
+561720,Janitorial Services,Janitorial Services,56,"Administrative, Support and Waste Services",5617,Unknown,Unknown
+561720,Window Cleaning Service,Window Cleaning Service ,56,"Administrative, Support and Waste Services",5617,Unknown,Unknown
+332994,Gun Manufacturer,"Small Arms, Ordnance, and Accessories",33,Manufacturing,3329,Unknown,Unknown
+312130,Winery,Winery,31,Manufacturing,3121,Unknown,"Cocktails, Wine & Beer"
+622110,Medical-Hospital,Medical-Hospital,62,Health Care and Social Assistance,6221,Unknown,Unknown
+713910,GOLF SIMULATOR RENTALS,GOLF SIMULATOR RENTALS,71,"Arts, Entertainment and Recreation",7139,Other Amusement and Recreation Industries,Entertainment
+541922,Photography-Commercial,Photography-Commercial,54,"Professional, Scientific and Technical Services",5419,Unknown,Unknown
+532111,Rental-Car Rentals,Rental-Car Rentals,53,Real Estate Rental and Leasing,5321,Unknown,Unknown
+624210,Social Svcs-Community Food Svcs,Social Svcs-Community Food Svcs,62,Health Care and Social Assistance,6242,Unknown,Unknown
+561499,Business Support Services-Misc,Business Support Services-Misc,56,"Administrative, Support and Waste Services",5614,Unknown,Unknown
+813940,Organization-Political,Organization-Political,81,Other Services (except Public Administration),8139,Unknown,Unknown
+721191,Bed & Breakfast Inn,Bed & Breakfast Inn,72,Accommodation and Food Services,7211,Traveler Accommodation,Bed & Breakfast Inn
+713950,Bowling Alley,Bowling Alley,71,"Arts, Entertainment and Recreation",7139,Other Amusement and Recreation Industries,Entertainment
+813311,Human Rights Organization,Human Rights Organization,81,Other Services (except Public Administration),8133,Unknown,Unknown
+561790,Chimney Cleaning/Sweep,Chimney Cleaning/Sweep,56,"Administrative, Support and Waste Services",5617,Unknown,Unknown
+237310,"Const-Highway, Street & Bridge","Const-Highway, Street & Bridge",23,Construction,2373,Unknown,Unknown
+541213,Tax Preparation Services,Tax Preparation Services,54,"Professional, Scientific and Technical Services",5412,Unknown,Unknown
+452990,"Retail-Warehouse, Clubs & Supercenters","Retail-Warehouse, Clubs & Supercenters",45,Retail Trade,4529,Other General Merchandise Stores,Shopping
+541910,Marketing Research,Marketing Research,54,"Professional, Scientific and Technical Services",5419,Unknown,Unknown
+561492,Court Reporting & Stenotype Svcs,Court Reporting & Stenotype Svcs,56,"Administrative, Support and Waste Services",5614,Unknown,Unknown
+541611,Consulting Service,Consulting Service,54,"Professional, Scientific and Technical Services",5416,Unknown,Unknown
+238310,Drywall & Insulation,Drywall & Insulation,23,Construction,2383,Unknown,Unknown
+624190,Social Svcs-Individual & Family Svcs,Social Svcs-Individual & Family Svcs,62,Health Care and Social Assistance,6241,Unknown,Unknown
+623990,Medical-Residential Care Facility,Medical-Residential Care Facility,62,Health Care and Social Assistance,6239,Unknown,Unknown
+541921,Photography,Photography/Portrait Studio,54,"Professional, Scientific and Technical Services",5419,Unknown,Unknown
+238190,Welding/Fabrication,Welding/Fabrication,23,Construction,2381,Unknown,Unknown
+453920,Art Dealer,Art Dealer,45,Retail Trade,4539,Other Miscellaneous Store Retailers,Shopping
+316998,Leather Goods Manufacturing,Leather Goods Manufacturing,31,Manufacturing,3169,Unknown,Unknown
+541350,Building Inspection Services,Building Inspection Services,54,"Professional, Scientific and Technical Services",5413,Unknown,Unknown
+921140,Gov-Executive & Legislative Offices,Gov-Executive & Legislative Offices,92,Public Administration,9211,Unknown,Unknown
+621310,Medical-Chiropractor,Medical-Chiropractor,62,Health Care and Social Assistance,6213,Unknown,Unknown
+441222,Boat Dealer,Boat Dealer,44,Retail Trade,4412,Other Motor Vehicle Dealers,Shopping
+212399,Mineral Shop,"nonmetallic minerals (except stone, sand, gravel, clay, etc.)",21,Mining,2123,Unknown,Unknown
+522298,Pawnshop,Pawnshop,52,Finance and Insurance,5222,Unknown,Unknown
+443141,Retail-Home Appliances,Retail-Home Appliances,44,Retail Trade,4431,Electronics and Appliance Stores,Shopping
+541990,Professional-Misc,Professional-Misc,54,"Professional, Scientific and Technical Services",5419,Unknown,Unknown
+561790,Pressure Washing,Exterior Building/Dwelling Cleaning,56,"Administrative, Support and Waste Services",5617,Unknown,Unknown
+453310,Retail-Thrift Store,Retail-Thrift Store,45,Retail Trade,4533,Used Merchandise Stores,Shopping
+541370,Surveying/Mapping Services,Surveying/Mapping Services,54,"Professional, Scientific and Technical Services",5413,Unknown,Unknown
+561320,Temp Agency,Temp Agency,56,"Administrative, Support and Waste Services",5613,Unknown,Unknown
+561491,Repossession Services,Repossession Services,56,"Administrative, Support and Waste Services",5614,Unknown,Unknown
+541890,Advertising Services,Advertising Services,54,"Professional, Scientific and Technical Services",5418,Unknown,Unknown
+524291,Insurance Claims Adjusting,Insurance Claims Adjusting,52,Finance and Insurance,5242,Unknown,Unknown
+621498,Medical-Outpatient Care Center,Medical-Outpatient Care Center,62,Health Care and Social Assistance,6214,Unknown,Unknown
+441228,Motorcycle & ATV Dealer,Motorcycle & ATV Dealer,44,Retail Trade,4412,Other Motor Vehicle Dealers,Shopping
+485310,Transportation-Taxi,Transportation-Taxi,48,Transportation and Warehousing,4853,Unknown,Unknown
+451120,"Retail-Hobbies, Toys & Games ","Retail-Hobbies, Toys & Games",45,Retail Trade,4511,"Sporting Goods, Hobby and Musical Instrument Stores",Shopping
+237130,Contractor-Telecommunications,Telecommunications,23,Construction,2371,Unknown,Unknown
+711510,Writer,Writer,71,"Arts, Entertainment and Recreation",7115,"Independent Artists, Writers and Performers",Entertainment
+541712,Research & Development,Research & Development,54,"Professional, Scientific and Technical Services",5417,Unknown,Unknown
+611710,Educational Support Services,Educational Support Services,61,Educational Services,6117,Unknown,Unknown
+624120,Residential Care Services ,Adult Care,62,Health Care and Social Assistance,6241,Unknown,Unknown
+812910,Pet Care Services,Pet Care Services,81,Other Services (except Public Administration),8129,Unknown,Unknown
+512100,Videography,,51,Information,5121,Unknown,Unknown
+813110,Religious Organization,Religious Organization,81,Other Services (except Public Administration),8131,Unknown,Unknown
+442110,Retail-Furniture Store,Retail-Furniture Store,44,Retail Trade,4421,Furniture Stores,Shopping
+445120,Convenience Store,Convenience Store,44,Retail Trade,4451,Grocery Stores,Grocery Stores
+561599,Travel Arrangement Svcs-Misc,Travel Arrangement Svcs-Misc,56,"Administrative, Support and Waste Services",5615,Unknown,Unknown
+623312,Medical-Assisted Living Facility/Elderly,Medical-Assisted Living Facility/Elderly,62,Health Care and Social Assistance,6233,Unknown,Unknown
+541511,Computer Programming,Computer Programming,54,"Professional, Scientific and Technical Services",5415,Unknown,Unknown
+811191,Auto-Oil Change/Lubrication Shop,Auto-Oil Change/Lubrication Shop,81,Other Services (except Public Administration),8111,Unknown,Unknown
+811490,"Watch, Clock, Jewelry Repair",Watch and Clock Repair,81,Other Services (except Public Administration),8114,Unknown,Unknown
+453220,Retail-Gift & Novelty Store,Retail-Gift & Novelty Store,45,Retail Trade,4532,"Office Supplies, Stationary and Gift Stores",Shopping
+561450,Credit Bureau,Credit Bureau,56,"Administrative, Support and Waste Services",5614,Unknown,Unknown
+517919,Telecommunications,Telecommunications,51,Information,5179,Unknown,Unknown
+511120,Publisher-Books,Publisher-Books,51,Information,5111,Unknown,Unknown
+453998,All Other Miscellaneous Store Retailers (Except Tobacco Stores),All Other Miscellaneous Store Retailers (Except Tobacco Stores),45,Retail Trade,4539,Other Miscellaneous Store Retailers,Shopping
+446191,Retail-Health Food & Supplements,Retail-Health Food & Supplements,44,Retail Trade,4461,Health and Personal Care Stores,Shopping
+541380,Laboratory,Laboratory,54,"Professional, Scientific and Technical Services",5413,Unknown,Unknown
+238330,Flooring,Flooring,23,Construction,2383,Unknown,Unknown
+532490,Rental-Equipment/Machinery Rentals,Rental-Equipment/Machinery Rentals,53,Real Estate Rental and Leasing,5324,Unknown,Unknown
+812199,Tanning Salon,All Other Personal Care Services,81,Other Services (except Public Administration),8121,Unknown,Unknown
+561622,Locksmith,Locksmith,56,"Administrative, Support and Waste Services",5616,Unknown,Unknown
+511110,Newspaper Publisher,Newspaper Publisher,51,Information,5111,Unknown,Unknown
+488410,Towing,Towing,48,Transportation and Warehousing,4884,Unknown,Unknown
+621399,Medical-Nutritionist,Medical-Nutritionist,62,Health Care and Social Assistance,6213,Unknown,Unknown
+561612,Security Guard & Patrol Services,Security Guard & Patrol Services,56,"Administrative, Support and Waste Services",5616,Unknown,Unknown
+561621,Security System Services,Security System Services,56,"Administrative, Support and Waste Services",5616,Unknown,Unknown
+519120,Library,Library,51,Information,5191,Unknown,Unknown
+444120,Retail-Paint & Wallpaper,Retail-Paint & Wallpaper,44,Retail Trade,4441,Building Material and Supplies Dealers,Unknown
+221122,Electric Company,Electric Company,22,Utilities,2211,Unknown,Unknown
+446120,Retail-Beauty Supply/Cosmetics,Retail-Beauty Supply/Cosmetics,44,Retail Trade,4461,Health and Personal Care Stores,Shopping
+445291,Food-Baked Goods Store,Food-Baked Goods Store,44,Retail Trade,4452,Specialty Food Stores,Grocery Stores
+813319,Organization-Social Advocacy,Organization-Social Advocacy,81,Other Services (except Public Administration),8133,Unknown,Unknown
+444220,Retail-Farm Supplies,Retail-Farm Supplies,44,Retail Trade,4442,Lawn and Garden Equipment and Supplies Stores,Shopping
+561510,Travel Agency,Travel Agency,56,"Administrative, Support and Waste Services",5615,Unknown,Unknown
+485320,Transportation-Limousine,Transportation-Limousine,48,Transportation and Warehousing,4853,Unknown,Unknown
+712130,AQUARIUM,ZOO'S AND BOTANICAL GARDENS,71,"Arts, Entertainment and Recreation",7121,"Museums, Historical Sites and Similar Institutions",Entertainment
+541340,Drafting Services,Drafting Services,54,"Professional, Scientific and Technical Services",5413,Unknown,Unknown
+339910,Jewelry and Silverware Manufacturing,Jewelry Maker Services,33,Manufacturing,3399,Unknown,Unknown
+621111,Medical-Physician,Medical-Physician,62,Health Care and Social Assistance,6211,Unknown,Unknown
+522130,Finance-Credit Union,Finance-Credit Union,52,Finance and Insurance,5221,Unknown,Bank
+485113,Transportation-Bus System,Transportation-Bus System,48,Transportation and Warehousing,4851,Unknown,Unknown
+713910,Golf Course/Country Club,Golf Course/Country Club,71,"Arts, Entertainment and Recreation",7139,Other Amusement and Recreation Industries,Entertainment
+713990,Amusement/Recreation Misc,Amusement/Recreation Misc,71,"Arts, Entertainment and Recreation",7139,Other Amusement and Recreation Industries,Entertainment
+812210,Funeral Home/Services,Feneral Home/Services,81,Other Services (except Public Administration),8122,Unknown,Unknown
+484220,Transportation-Trucking (Freight),Transportation-Trucking (Freight),48,Transportation and Warehousing,4842,Unknown,Unknown
+453210,Retail-Office Supplies,Retail-Office Supplies,45,Retail Trade,4532,"Office Supplies, Stationary and Gift Stores",Shopping
+522310,Finance-Loan Broker(Mortg/Nonmortg),Finance-Loan Broker(Mortg/Nonmortg),52,Finance and Insurance,5223,Unknown,Unknown
+484110,Transportation-Trucking (Local),Transportation-Trucking (Local),48,Transportation and Warehousing,4841,Unknown,Unknown
+532299,Rental-Misc Rentals,Rental-Misc Rentals,53,Real Estate Rental and Leasing,5322,Unknown,Unknown
+561431,Mail Center-Private,Mail Center-Private,56,"Administrative, Support and Waste Services",5614,Unknown,Unknown
+812112,Esthetician Services,"Esthetics, Salons, Cosmetology",81,Other Services (except Public Administration),8121,Unknown,Salon
+339999,Manufacturing-Misc Manufacturing,Manufacturing-Misc Manufacturing,33,Manufacturing,3399,Unknown,Unknown
+541320,Landscaping Services,Landscaping Services,54,"Professional, Scientific and Technical Services",5413,Unknown,Unknown
+722410,Bar/Tavern,Bar/Tavern,72,Accommodation and Food Services,7224,Drinking Places (Alcoholic Beverages),"Cocktails, Wine & Beer"
+561910,Packaging and Labeling Services,"Gift Wrapping, Kit Assembly, Apparel and Textile Services",56,"Administrative, Support and Waste Services",5619,Unknown,Unknown
+551114,"Managing, Corporate & Subsidiary Offices","Managing, Corporate & Subsidiary Offices",55,Management of Companies and Enterprises,5511,Unknown,Unknown
+561440,Collection Agency,Collection Agency,56,"Administrative, Support and Waste Services",5614,Unknown,Unknown
+711510,Artist,Artist,71,"Arts, Entertainment and Recreation",7115,"Independent Artists, Writers and Performers",Entertainment
+531311,Property Management,Property Management,53,Real Estate Rental and Leasing,5313,Unknown,Unknown
+517110,Telecommunication-Wireless Carrier,Telecommunication-Wireless Carrier,51,Information,5171,Unknown,Unknown
+712110,Museum,Museum,71,"Arts, Entertainment and Recreation",7121,"Museums, Historical Sites and Similar Institutions",Entertainment
+541214,Payroll Services,Payroll Services,54,"Professional, Scientific and Technical Services",5412,Unknown,Unknown
+236118,Const-Residential Remodeler,Const-Residential Remodeler,23,Construction,2361,Unknown,Unknown
+624221,Social Svcs-Temporary Shelter,Social Svcs-Temporary Shelter,62,Health Care and Social Assistance,6242,Unknown,Unknown
+424490,Soft Drink Merchant Wholesaler,Soft Drink Merchant Wholesaler,42,Wholesale Trade,4244,Unknown,Unknown
+512110,Movie Production,Movie Production,51,Information,5121,Unknown,Unknown
+311811,Bakery,Bakery,31,Manufacturing,3118,Unknown,Unknown
+423310,"Lumber, Plywood, Millwork, and Wood Panel Merchant",Wood Wholesale,42,Wholesale Trade,4233,Unknown,Unknown
+561330,Professional Employer Organization,Professional Employer Organization,56,"Administrative, Support and Waste Services",5613,Unknown,Unknown
+812320,Dry Cleaning Services,Dry Cleaning Services,81,Other Services (except Public Administration),8123,Unknown,Unknown
+812111,Barber Shop,Barber Shop,81,Other Services (except Public Administration),8121,Unknown,Salon
+624110,Social Svcs-Child & Youth Facility,Social Svcs-Child & Youth Facility,62,Health Care and Social Assistance,6241,Unknown,Unknown
+713120,Arcade,Arcade,71,"Arts, Entertainment and Recreation",7131,Amusement Parks and Arcades,Entertainment
+999999,Crafts & Hobbies,Crafts & Hobbies,99,Unknown,9999,Unknown,Unknown
+811219,Medical Equipment Repair,Repair and Maintain Electronic & Precision Equipment,81,Other Services (except Public Administration),8112,Unknown,Unknown
+238990,Sign Installation/Painting,Sign Installation/Painting,23,Construction,2389,Unknown,Unknown
+451110,Retail-Gun Dealer,Retail-Gun Dealer,45,Retail Trade,4511,"Sporting Goods, Hobby and Musical Instrument Stores",Firearms
+531110,Rental Units/Landlord,Rental Units/Landlord,53,Real Estate Rental and Leasing,5311,Unknown,Unknown
+624229,Other Community Housing Services,Health Care and Social Assistance,62,Health Care and Social Assistance,6242,Unknown,Unknown
+561520,Tour Operator,Tour Operator,56,"Administrative, Support and Waste Services",5615,Unknown,Unknown
+484210,Moving Company,Moving Company,48,Transportation and Warehousing,4842,Unknown,Unknown
+238130,Contractor-Framing,Contractor-Framing,23,Construction,2381,Unknown,Unknown
+561611,Private Investigator,Private Investigator,56,"Administrative, Support and Waste Services",5616,Unknown,Unknown
+221210,Natural Gas Company,Natural Gas Company,22,Utilities,2212,Unknown,Unknown
+311942,Spice and Extract Manufacturing,"Spices, Table Salt, Seasonings, Flavoring Extracts",31,Manufacturing,3119,Unknown,Unknown
+561439,Business Service Center-Misc,Business Service Center-Misc,56,"Administrative, Support and Waste Services",5614,Unknown,Unknown
+492110,Delivery Service-Courier & Express,Delivery Service-Courier & Express,49,Transportation and Warehousing,4921,Unknown,Unknown
+812112,Beauty Salon,Beauty Salon,81,Other Services (except Public Administration),8121,Unknown,Salon
+323111,Printing-Commercial,Printing-Commercial,32,Manufacturing,3231,Unknown,Unknown
+711410,Agent-Arts & Entertainment,Agent-Arts & Entertainment,71,"Arts, Entertainment and Recreation",7114,"Agents and Managers for Artists, Athletes, Entertainers and Other Public Figures",Unknown
+452990,Retail-General Merchandise ,Retail-General Merchandise,45,Retail Trade,4529,Other General Merchandise Stores,Shopping
+423450,Medical Equipment and Supplies Merchant,"Medical, Dental, and Hospital Equipment and Supplies Merchant",42,Wholesale Trade,4234,Unknown,Unknown
+813312,Environmental/Conservation Organization,Environmental/Conservation Organization,81,Other Services (except Public Administration),8133,Unknown,Unknown
+921190,Gov-Governmental Support,Gov-Governmental Support,92,Public Administration,9211,Unknown,Unknown
+453910,Retail-Pets & Pet Supplies,Retail-Pets & Pet Supplies,45,Retail Trade,4539,Other Miscellaneous Store Retailers,Shopping
+541110,Lawyer,Lawyer,54,"Professional, Scientific and Technical Services",5411,Unknown,Unknown
+541613,Digital Agency,Digital Marketing Services,54,"Professional, Scientific and Technical Services",5416,Unknown,Unknown
+454390,Retail-Misc Direct Selling Establishment,Retail-Misc Direct Selling Establishment,45,Retail Trade,4543,Direct Selling Establishments,Shopping
+722511,Restaurant,Restaurant,72,Accommodation and Food Services,7225,Restaurants and Other Eating Places,Food & Drink
+238340,CONTRACTOR-TILE,CONTRACTOR-TILE,23,Construction,2383,Unknown,Unknown
+621512,Medical-Diagnostic Imaging Center,Medical-Diagnostic Imaging Center,62,Health Care and Social Assistance,6215,Unknown,Unknown
+442210,Retail-Floor Coverings,Retail-Floor Coverings,44,Retail Trade,4422,Home Furnishings Stores,Shopping
+811310,Machinery/Equipment Maint,Machinery/Equipment Maint,81,Other Services (except Public Administration),8113,Unknown,Unknown
+811430,Leather Goods & Footwear Repair,Leather Goods & Footwear Repair,81,Other Services (except Public Administration),8114,Unknown,Unknown
+238220,Contractor-HVAC Services,Contractor-HVAC Services,23,Construction,2382,Unknown,Unknown
+711510,Performer-Misc,Performer-Misc,71,"Arts, Entertainment and Recreation",7115,"Independent Artists, Writers and Performers",Entertainment
+541840,Media Representatives,Media Representatives,54,"Professional, Scientific and Technical Services",5418,Unknown,Unknown
+491110,Postal Service,Postal Service,49,Transportation and Warehousing,4911,Unknown,Unknown
+532230,Movie Rentals,Movie Rentals,53,Real Estate Rental and Leasing,5322,Unknown,Unknown
+811211,Consumer Electronics Repair/Maint,Consumer Electronics Repair/Maint,81,Other Services (except Public Administration),8112,Unknown,Unknown
+515112,Radio Station,Radio Station,51,Information,5151,Unknown,Unknown
+448310,Retail-Jewelry Store,Retail-Jewerly Store,44,Retail Trade,4483,"Jewelry, Luggage and Leather Goods Stores",Clothing & Accessories
+238990,House Moving (Structural Moving),House Moving (Structural Moving),23,Construction,2389,Unknown,Unknown
+512132,Movie Theater-Drive-In,Movie Theater-Drive-In,51,Information,5121,Unknown,Unknown
+713940,AXE THROWING,AXE THROWING,71,"Arts, Entertainment and Recreation",7139,Other Amusement and Recreation Industries,Entertainment
+453110,Florist,Florist,45,Retail Trade,4531,Florists,Shopping
+541199,Legal Services,Legal Services,54,"Professional, Scientific and Technical Services",5411,Unknown,Unknown
+813930,Labor Union/Organization,Labor Union/Organization,81,Other Services (except Public Administration),8139,Unknown,Unknown
+621210,Medical-Dentist,Medical-Dentist,62,Health Care and Social Assistance,6212,Unknown,Unknown
+711110,Theater Company/Dinner Theater,Theater Company/Dinner Theater,71,"Arts, Entertainment and Recreation",7111,Performing Arts Companies,Entertainment
+561720,Cleaning Service,Cleaning Service,56,"Administrative, Support and Waste Services",5617,Unknown,Unknown
+531210,Real Estate Agents/Brokers,Real Estate Agents/Brokers,53,Real Estate Rental and Leasing,5312,Unknown,Unknown
+811490,Tailor,Tailor,81,Other Services (except Public Administration),8114,Unknown,Unknown
+541410,Interior Design,Interior Design,54,"Professional, Scientific and Technical Services",5414,Unknown,Unknown
+721211,RV Parks & Campgrounds,RV Parks & Campgrounds,72,Accommodation and Food Services,7212,RV (Recreational Vehicle) Parks and Recreational Camps,Accommodation
+812191,Diet/Weight Reduction Center,Diet/Weight Reduction Center,81,Other Services (except Public Administration),8121,Unknown,Unknown
+713110,Amusement/Theme Park,Amusement/Theme Park,71,"Arts, Entertainment and Recreation",7131,Amusement Parks and Arcades,Entertainment
+311999,Manufacturing-Misc Food,Manufacturing-Misc Food,31,Manufacturing,3119,Unknown,Unknown
+541219,Bookkeeping Services,All Other Accounting Services,54,"Professional, Scientific and Technical Services",5412,Unknown,Unknown
+611699,Education-Misc Schools & Institutions,Educationl-Misc Schools & Institutions,61,Educational Services,6116,Unknown,Unknown
+621340,Medical-Occupational & Speech Therapist,Medical-Occupational & Speech Therapist,62,Health Care and Social Assistance,6213,Unknown,Unknown
+812990,All Other Personal Services,"Personal Trainer, Fitness & Recreational",81,Other Services (except Public Administration),8129,Unknown,Unknown
+722513,Limited-Service Restaurant,"Cafes, Fast Food, Carryout, Delicatessen",72,Accommodation and Food Services,7225,Restaurants and Other Eating Places,Food & Drink
+238320,Painting & Wall Covering,Painting & Wall Covering,23,Construction,2383,Unknown,Unknown
+488991,Packing & Crating,Packing & Crating,48,Transportation and Warehousing,4889,Unknown,Unknown
+621399,Medical-Massage Therapy,Medical-Massage Therapy,62,Health Care and Social Assistance,6213,Unknown,Unknown
+111332,Vineyard,Vineyard,11,"Agriculture, Forestry, Fishing and Hunting",1113,Unknown,Unknown
+522120,Finance-Savings Institution,Finance-Savings Institution,52,Finance and Insurance,5221,Unknown,Unknown
+621320,Medical-Ophthalmologist,Eye Physician,62,Health Care and Social Assistance,6213,Unknown,Unknown
+561990,Auctioneer,Auctioneer,56,"Administrative, Support and Waste Services",5619,Unknown,Unknown
+813920,Professional Organizer,Professional Organizer,81,Other Services (except Public Administration),8139,Unknown,Unknown
+561740,Carpet & Upholstery Cleaning,Carpet & Upholstery Cleaning,56,"Administrative, Support and Waste Services",5617,Unknown,Unknown
+524126,Bonding,Bonding,52,Finance and Insurance,5241,Unknown,Unknown
+621330,Medical - Mental Health Counselor,Medical - Mental Health Counselor,62,Health Care and Social Assistance,6213,Unknown,Unknown
+541310,Architectural Services,Architectural Services,54,"Professional, Scientific and Technical Services",5413,Unknown,Unknown
+713940,Fitness Center,Fitness Center,71,"Arts, Entertainment and Recreation",7139,Other Amusement and Recreation Industries,Entertainment
+238220,Solar Equipment Installation,Solar Equipment Installation,23,Construction,2382,Unknown,Unknown
+621399,Reflexology,Reflexology,62,Health Care and Social Assistance,6213,Unknown,Unknown
+111998,Farming-Misc Crops,Farming-Misc Crops,11,"Agriculture, Forestry, Fishing and Hunting",1119,Unknown,Unknown
+621999,Health Screening Services,"Telehealth, Physical Evaluation, Smoking Cessation.",62,Health Care and Social Assistance,6219,Unknown,Unknown
+445210,Butcher/Meat Market,Butcher/Meat Market,44,Retail Trade,4452,Specialty Food Stores,Grocery Stores
+922160,Fire Protection,Emergency Services,92,Public Administration,9221,Unknown,Unknown
+448210,Retail-Shoes,Retail-Shoes,44,Retail Trade,4482,Shoe Stores,Clothing & Accessories
+532220,Rental-Costume/Formal Wear Rentals,Rental-Costume/Formal Wear Rentals,53,Real Estate Rental and Leasing,5322,Unknown,Unknown
+444130,Retail-Hardware,Retail-Hardware,44,Retail Trade,4441,Building Material and Supplies Dealers,Unknown
+111940,Farming-Hay,Farming-Hay,11,"Agriculture, Forestry, Fishing and Hunting",1119,Unknown,Unknown
+238190,Contractor-General/Building Exterior,Contractor-General/Building Exterior,23,Construction,2381,Unknown,Unknown
+813312,Wildlife Organization,Wildlife Organization,81,Other Services (except Public Administration),8133,Unknown,Unknown
+541430,Graphic Design,Graphic Design,54,"Professional, Scientific and Technical Services",5414,Unknown,Unknown
+453930,RV/Mobile Home Dealer,RV/Mobile Home Dealer,45,Retail Trade,4539,Other Miscellaneous Store Retailers,Shopping
+561410,Document Preparation Services,Document Preparation Services,56,"Administrative, Support and Waste Services",5614,Unknown,Unknown
+813410,Organization-Civic/Social,Organization-Civic/Social,81,Other Services (except Public Administration),8134,Unknown,Unknown
+237110,Water and Sewer Line Structures Construction,"Construction Management, Water and Sewer Line",23,Construction,2371,Unknown,Unknown
+621610,Medical-Home Health Care Services,Medical-Home Health Care Services,62,Health Care and Social Assistance,6216,Unknown,Unknown
+454113,Mail Order House,Mail Order House,45,Retail Trade,4541,Electronic Shopping and Mail-Order Houses,Shopping
+722515,Snack and Nonalcoholic Beverage Shop,"Coffee Stand, Ice Cream Parlor, Bakery Cafe",72,Accommodation and Food Services,7225,Restaurants and Other Eating Places,Coffee & Snacks
+442299,Retail-Home Furnishings ,Retail-Home Furnishings,44,Retail Trade,4422,Home Furnishings Stores,Shopping
+451140,Retail-Music/Instruments & Supplies,Retail-Music/Instruments & Supplies,45,Retail Trade,4511,"Sporting Goods, Hobby and Musical Instrument Stores",Shopping
+321113,Sawmill,Sawmill,32,Manufacturing,3211,Unknown,Unknown
+812930,Parking Lot/Garage,Parking Lot/Garage,81,Other Services (except Public Administration),8129,Unknown,Unknown
+922140,Correctional Institution,Correctional Institution,92,Public Administration,9221,Unknown,Unknown
+621340,Medical-Audiologist,Medical-Audiologist,62,Health Care and Social Assistance,6213,Unknown,Unknown
+525990,Finance-Other Financial Vehicles,Finance-Other Financial Vehicles,52,Finance and Insurance,5259,Unknown,Unknown
+811113,Auto-Transmission Repair,Auto-Transmission Repair,81,Other Services (except Public Administration),8111,Unknown,Unknown
+561439,Copying/Duplicating,Copying/Duplicating,56,"Administrative, Support and Waste Services",5614,Unknown,Unknown
+813990,Organization-Misc,Organization-Misc,81,Other Services (except Public Administration),8139,Unknown,Unknown
+722320,Caterer,Caterer,72,Accommodation and Food Services,7223,Special Food Services,Food & Drink
+562991,Waste-Septic Tank & Related Services,Waste-Septic Tank & Related Services,56,"Administrative, Support and Waste Services",5629,Unknown,Unknown
+621391,Medical-Podiatrist,Medical-Podiatrist,62,Health Care and Social Assistance,6213,Unknown,Unknown
+811490,Personal & Household Goods Repair/Maint,Personal & Household Goods Repair/Maint,81,Other Services (except Public Administration),8114,Unknown,Unknown
+448130,Retail-Children's Clothes Store,Retail-Children's Clothes Store,44,Retail Trade,4481,Clothing Stores,Clothing & Accessories
+561613,Armored Car Services,Armored Car Services,56,"Administrative, Support and Waste Services",5616,Unknown,Unknown
+525920,"Trusts, Estates, and Agency Accounts","Estate Liquidation, Trusts, Settlements",52,Finance and Insurance,5259,Unknown,Unknown
+562910,Restoration,Remodelers,56,"Administrative, Support and Waste Services",5629,Unknown,Unknown
+312120,Brewery,Brewery,31,Manufacturing,3121,Unknown,"Cocktails, Wine & Beer"
+444220,Retail-Nursery & Garden Center,Retail-Nursery & Garden Center,44,Retail Trade,4442,Lawn and Garden Equipment and Supplies Stores,Shopping
+451110,Retail-Sporting Goods,Retail-Sporting Goods,45,Retail Trade,4511,"Sporting Goods, Hobby and Musical Instrument Stores",Firearms
+532310,Rental-General Rental Center,Rental-General Rental Center,53,Real Estate Rental and Leasing,5323,Unknown,Unknown
+445220,Food-Fish & Seafood Market,Food-Fish & Seafood Market,44,Retail Trade,4452,Specialty Food Stores,Grocery Stores
+512210,Record Production,Record Production,51,Information,5122,Unknown,Unknown
+522291,Finance-Consumer Lending,Finance-Consumer Lending,52,Finance and Insurance,5222,Unknown,Unknown
+721110,Hotel/Motel,Hotel/Motel,72,Accommodation and Food Services,7211,Traveler Accommodation,Accommodation
+711211,Sports Teams & Clubs,Sports Teams & Clubs,71,"Arts, Entertainment and Recreation",7112,Spectator Sports,Entertainment
+523999,Finance-Investment Activities,Finance-Investment Activities,52,Finance and Insurance,5239,Unknown,Unknown
+238120,Contractor-Steel & Precast,Contractor-Steel & Precast,23,Construction,2381,Unknown,Unknown
+621320,Medical-Optometrist,Medical-Optometrist,62,Health Care and Social Assistance,6213,Unknown,Unknown
+541120,Notary,Notary,54,"Professional, Scientific and Technical Services",5411,Unknown,Unknown
+238140,Contractor-Masonry,Contractor-Masonry,23,Construction,2381,Unknown,Unknown
+441320,Retail-Tire Dealer,Retail-Tire Dealer,44,Retail Trade,4413,"Automotive Parts, Accessories and Tire Stores",Shopping
+541330,Engineering Services,Engineering Services,54,"Professional, Scientific and Technical Services",5413,Unknown,Unknown
+424210,Vending Machine Operator,Vending Machine Operator,42,Wholesale Trade,4242,Unknown,Unknown
+452111,Retail-Department Store,Retail-Department Store,45,Retail Trade,4521,Department Stores,Shopping
+212299,Mining-Metal Ore,Mining-Metal Ore,21,Mining,2122,Unknown,Unknown
+481111,Transportation-Air (Scheduled),Transportation-Air (Scheduled),48,Transportation and Warehousing,4811,Unknown,Unknown
+238220,Plumber,Plumber,23,Construction,2382,Unknown,Unknown
+115210,Dog Breeder,Dog Breeder,11,"Agriculture, Forestry, Fishing and Hunting",1152,Unknown,Unknown
+621511,Medical-Laboratory,Medical-Laboratory,62,Health Care and Social Assistance,6215,Unknown,Unknown
+236220,Handyman,Handyman,23,Construction,2362,Unknown,Unknown
+811212,Computer/Office Machine Maint,Computer/Office Machine Maint,81,Other Services (except Public Administration),8112,Unknown,Unknown
+621492,Medical-Dialysis Center,Medical-Dialysis Center,62,Health Care and Social Assistance,6214,Unknown,Unknown
+445230,Food-Fruits & Vegetables Market,Food-Fruits & Vegetables Market,44,Retail Trade,4452,Specialty Food Stores,Grocery Stores
+441310,Retail-Automotive Parts & Accessories,Retail-Automotive Parts & Accessories,44,Retail Trade,4413,"Automotive Parts, Accessories and Tire Stores",Shopping
+811412,Appliance Reapair/Maint,Appliance Repair/Maint,81,Other Services (except Public Administration),8114,Unknown,Unknown
+814110,Chef,Chef,81,Other Services (except Public Administration),8141,Unknown,Unknown
+446110,Pharmacy/Drug Store,Pharmacy/Drug Store,44,Retail Trade,4461,Health and Personal Care Stores,Shopping

@@ -20,11 +20,11 @@ pub fn deserialize_arcgis_data<'de, D: Deserializer<'de>>(
 /// Generic function to serialize data types into a CSV file.  Called by methods to avoid code
 /// duplication.
 pub fn to_csv<T: Serialize + Clone, P: AsRef<std::path::Path>>(
-    item: &mut Vec<T>,
+    item: &mut [T],
     title: P,
 ) -> Result<(), std::io::Error> {
     let mut wtr = csv::Writer::from_path(title)?;
-    for i in item.clone() {
+    for i in item.iter().cloned() {
         wtr.serialize(i)?;
     }
     wtr.flush()?;
@@ -40,10 +40,14 @@ pub fn from_csv<T: DeserializeOwned + Clone, P: AsRef<std::path::Path>>(
     let file = std::fs::File::open(path)?;
     let mut rdr = csv::Reader::from_reader(file);
 
+    let mut dropped = 0;
     for result in rdr.deserialize() {
-        let record: T = result?;
-        records.push(record);
+        match result {
+            Ok(record) => records.push(record),
+            Err(_) => dropped += 1,
+        }
     }
+    tracing::info!("{} records dropped.", dropped);
 
     Ok(records)
 }

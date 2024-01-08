@@ -1,21 +1,29 @@
 use crate::prelude::*;
+use aid::prelude::*;
 use address::prelude::*;
 use indicatif::ProgressBar;
 use serde::{Deserialize, Serialize};
 
+/// The `Vote` enum represents voting options on the 2023 public service revenue survey.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Vote {
+    /// Option 1: $27/$88 Public Safety Utility Fee only
     UtilityFee,
+    /// Option 2: 7% Food & Beverage Tax only
     FoodBeverageTax,
+    /// Option 3: 2% General Sales Tax only
     GeneralSalesTax,
+    /// Option 4: Utility Fee/Sales Tax
     UtilityFeeSalesTax,
+    /// Option 5: Utility Fee/Food & Beverage Tax
     UtilityFeeFoodBeverageTax,
+    /// Option 6: Reduce Police/Fire Staffing
     ReduceService,
 }
 
 impl TryFrom<&String> for Vote {
-    type Error = Error;
-    fn try_from(input: &String) -> SheetResult<Self> {
+    type Error = Bandage;
+    fn try_from(input: &String) -> Clean<Self> {
         let input = input.as_str();
         match input {
             "Option 1: $27/$88 Public Safety Utility Fee only" => Ok(Self::UtilityFee),
@@ -24,21 +32,30 @@ impl TryFrom<&String> for Vote {
             "Option 4: Utility Fee/Sales Tax" => Ok(Self::UtilityFeeSalesTax),
             "Option 5: Utility Fee/Food & Beverage Tax" => Ok(Self::UtilityFeeFoodBeverageTax),
             "Option 6: Reduce Police/Fire Staffing" => Ok(Self::ReduceService),
-            _ => Err(Error::ParseError),
+            _ => Err(Bandage::Parse),
         }
     }
 }
 
+/// The `JcSurveyRawItem` deserializes input survey data into string values, so that the library
+/// can attempt to parse the provided address information into [`PartialAddress`] types.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct JcSurveyRawItem {
+    /// The `city` field represents the city of residence for the respondent.
     pub city: Option<String>,
+    /// The `address` field is a text field representing the physical address of residence in the
+    /// city.
     pub address: Option<String>,
+    /// The `option` field represents the selected [`Vote`] option for the respondent, captured as
+    /// the text description associated with the selected survey option.
     pub option: Option<String>,
 }
 
+/// The `JcSurveyRaw` struct holds a vector of [`JcSurveyRawItem`] objects.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct JcSurveyRaw {
+    /// The `records` field holds a vector of [`JcSurveyRawItem`] objects.
     pub records: Vec<JcSurveyRawItem>,
 }
 
@@ -50,16 +67,23 @@ impl JcSurveyRaw {
     }
 }
 
+/// The `JcSurveyItem` represents a survey response where the submitted address text has been
+/// parsed into a [`PartialAddress`] object.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JcSurveyItem {
+    /// The `city` field represents the city of residence for the respondent.
     pub city: Option<String>,
+    /// The `address` field is the [`PartialAddress`] object parsed from the submitted address text
+    /// field in the survey.
     pub address: PartialAddress,
+    /// The `option` field represents the selected [`Vote`] option for the respondent, parsed from
+    /// the option description in the survey.
     pub option: Vote,
 }
 
 impl TryFrom<&JcSurveyRawItem> for JcSurveyItem {
-    type Error = Error;
-    fn try_from(raw: &JcSurveyRawItem) -> SheetResult<Self> {
+    type Error = Bandage;
+    fn try_from(raw: &JcSurveyRawItem) -> Clean<Self> {
         let city = raw.city.clone();
         if let Some(raw_address) = raw.address.clone() {
             match parse_address(&raw_address.to_uppercase()) {
@@ -77,37 +101,42 @@ impl TryFrom<&JcSurveyRawItem> for JcSurveyItem {
                             option,
                         })
                     } else {
-                        Err(Error::UnknownError)
+                        Err(Bandage::Unknown)
                     }
                 }
-                Err(_) => Err(Error::ParseError),
+                Err(_) => Err(Bandage::Parse),
             }
         } else {
-            Err(Error::UnknownError)
+            Err(Bandage::Unknown)
         }
     }
 }
 
+/// The `JcSurvey` struct holds a vector of [`JcSurveyItem`] objects.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct JcSurvey {
+    /// The `records` field holds a vector of [`JcSurveyItem`] objects.
     pub records: Vec<JcSurveyItem>,
 }
 
 impl JcSurvey {
     /// Creates a new `JcSurvey` struct from a CSV file located at `path`.
-    pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> SheetResult<Self> {
+    pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Clean<Self> {
         let records = from_csv(path)?;
         let records = JcSurveyRaw { records };
-        Ok(JcSurvey::try_from(&records)?)
+        JcSurvey::try_from(&records)
     }
 
+    /// Matches the [`PartialAddress`] in the `address` field of each `JcSurveyItem` in the
+    /// `records` field of the `JcSurvey` object against the addresses in `other`.  The method
+    /// gathers complete and partial address matches into a [`JcSurveyExport`] struct.
     pub fn validate(&self, other: &Addresses) -> JcSurveyExport {
         let mut records = Vec::new();
         for item in self.records.clone() {
             let res = MatchPartialRecord::compare(&item.address, other);
             let res = res.records();
-            if !res.is_empty() {
-                if res[0].match_status() != MatchStatus::Missing {
+            if !res.is_empty() && res[0].match_status() != MatchStatus::Missing {
+                // if res[0].match_status() != MatchStatus::Missing {
                     let address = res[0].address_label();
                     let option = item.option;
                     let x_coordinate = res[0].longitude().unwrap();
@@ -118,7 +147,7 @@ impl JcSurvey {
                         x_coordinate,
                         y_coordinate,
                     })
-                }
+                // }
             }
         }
         JcSurveyExport { records }
@@ -126,8 +155,8 @@ impl JcSurvey {
 }
 
 impl TryFrom<&JcSurveyRaw> for JcSurvey {
-    type Error = Error;
-    fn try_from(raw: &JcSurveyRaw) -> SheetResult<Self> {
+    type Error = Bandage;
+    fn try_from(raw: &JcSurveyRaw) -> Clean<Self> {
         let style = indicatif::ProgressStyle::with_template(
             "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {'Parsing addresses.'}",
         )
@@ -155,16 +184,30 @@ impl From<&JcSurvey> for PartialAddresses {
     }
 }
 
+/// The `JcSurveyExportItem` represents a survey response that has been partially or fully matched to a physical
+/// address. The struct includes coordinate data from the matched address to facilitate mapping of
+/// survey responses.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JcSurveyExportItem {
+    /// The `address` field contains the address label text string produced by the
+    /// [`Address::label()`] method.
     pub address: String,
+    /// The `option` field represents the selected [`Vote`] option for the respondent, parsed from
+    /// the option description in the survey.
     pub option: Vote,
+    /// The `x_coordinate` field represents the x coordinate for the spatial point assigned to the
+    /// address.
     pub x_coordinate: f64,
+    /// The `y_coordinate` field represents the y coordinate for the spatial point assigned to the
+    /// address.
     pub y_coordinate: f64,
 }
 
+/// The `JcSurveyExport` struct holds a vector of [`JcSurveyExportItem`] objects.  This struct
+/// provides a format for serializing the data into a CSV file.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JcSurveyExport {
+    /// The `records` field holds a vector of [`JcSurveyExportItem`] objects.
     pub records: Vec<JcSurveyExportItem>,
 }
 

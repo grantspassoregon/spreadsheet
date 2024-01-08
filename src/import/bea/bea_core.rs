@@ -1,4 +1,5 @@
-use crate::{error, utils};
+use crate::prelude::*;
+use aid::prelude::*;
 use indicatif::{ProgressBar, ProgressStyle};
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -68,7 +69,7 @@ impl BeaDataRaw {
                 ]),
         );
         bar.set_message("Loading...");
-        let records = utils::from_csv(path)?;
+        let records = from_csv(path)?;
         bar.finish_with_message("Loaded!");
         Ok(BeaDataRaw { records })
     }
@@ -128,6 +129,12 @@ impl BeaDatum {
     pub fn description(&self) -> String {
         self.description.clone()
     }
+
+    /// The `data_value` field represents the value of the datum.  This function returns the value
+    /// of the field.
+    pub fn data_value(&self) -> i64 {
+        self.data_value
+    }
 }
 
 /// The `BeaData` struct holds BEA data processed into library form.
@@ -171,7 +178,7 @@ impl BeaData {
                 ]),
         );
         bar.set_message("Loading...");
-        let records = utils::from_csv(path)?;
+        let records = from_csv(path)?;
         bar.finish_with_message("Loaded!");
         Ok(BeaData { records })
     }
@@ -180,7 +187,7 @@ impl BeaData {
     /// CSV file at location `title`.  Each element in the vector will become a row in the
     /// spreadsheet.
     pub fn to_csv<P: AsRef<std::path::Path>>(&mut self, title: P) -> Result<(), std::io::Error> {
-        utils::to_csv(self.records_mut(), title)?;
+        to_csv(self.records_mut(), title)?;
         Ok(())
     }
 
@@ -200,9 +207,10 @@ impl BeaData {
     pub fn linecode_hash(&self) -> HashMap<String, String> {
         let mut hash = HashMap::new();
         for record in self.records_ref() {
-            if !hash.contains_key(&record.code()) {
-                hash.insert(record.code(), record.description());
-            }
+            hash.entry(record.code()).or_insert_with(|| record.description());
+            // if !hash.contains_key(&record.code()) {
+            //     hash.insert(record.code(), record.description());
+            // }
         }
         hash
     }
@@ -223,9 +231,10 @@ impl BeaData {
     pub fn geofips_hash(&self) -> HashMap<i32, String> {
         let mut hash = HashMap::new();
         for record in self.records_ref() {
-            if !hash.contains_key(&record.geo_fips()) {
-                hash.insert(record.geo_fips(), record.geo_name());
-            }
+            hash.entry(record.geo_fips()).or_insert_with(|| record.geo_name());
+            // if !hash.contains_key(&record.geo_fips()) {
+            //     hash.insert(record.geo_fips(), record.geo_name());
+            // }
         }
         hash
     }
@@ -242,20 +251,21 @@ impl BeaData {
         keys
     }
 
+    /// Filters records in the struct based by comparing the string representation of values in the field specified in `filter` against the `test` value.  The `filter` field can take the values "year", "code", and "fips". 
     pub fn filter(&self, filter: &str, test: &str) -> Self {
-        info!("Calling filter on {} records.", self.records_ref().len());
+        trace!("Calling filter on {} records.", self.records_ref().len());
         let mut records = Vec::new();
         match filter {
             "year" => {
-                tracing::info!("Filtering by year {}", test);
+                tracing::trace!("Filtering by year {}", test);
                 records.append(&mut self.records_ref().iter().filter(|d| format!("{}", d.time_period()).as_str() == test).cloned().collect::<Vec<BeaDatum>>())
             },
             "code" => {
-                tracing::info!("Filtering by code {}", test);
+                tracing::trace!("Filtering by code {}", test);
                 records.append(&mut self.records_ref().iter().filter(|d| d.code() == test).cloned().collect::<Vec<BeaDatum>>())
             },
             "fips" => {
-                tracing::info!("Filtering by fips {}", test);
+                tracing::trace!("Filtering by fips {}", test);
                 records.append(&mut self.records_ref().iter().filter(|d| format!("{}", d.geo_fips()).as_str() == test).cloned().collect::<Vec<BeaDatum>>())
             },
             _ => tracing::warn!("Invalid filter provided."),
@@ -263,8 +273,10 @@ impl BeaData {
         Self { records }
     }
 
+    /// Filters records in the struct based upon string representations of the values for the
+    /// "year", "code" and "fips" fields.
     pub fn search(&self, year: &str, code: &str, fips: &str) -> Self {
-        info!("Calling search.");
+        trace!("Calling search.");
         self.filter("year", year)
             .filter("code", code)
             .filter("fips", fips)
@@ -272,9 +284,9 @@ impl BeaData {
 }
 
 impl TryFrom<BeaDataRaw> for BeaData {
-    type Error = error::Error;
+    type Error = Bandage;
 
-    fn try_from(raw: BeaDataRaw) -> Result<Self, Self::Error> {
+    fn try_from(raw: BeaDataRaw) -> Clean<Self> {
         let style = indicatif::ProgressStyle::with_template(
             "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {'Converting BEA data.'}",
         )
@@ -282,11 +294,9 @@ impl TryFrom<BeaDataRaw> for BeaData {
         let bar = ProgressBar::new(raw.records_ref().len() as u64);
         bar.set_style(style);
         let mut res = Vec::new();
-        let mut i = 0;
         let mut k = 0;
-        for record in raw.records() {
+        for (i, record) in raw.records().into_iter().enumerate() {
             trace!("Processing row {}", i);
-            i += 1;
             let value = str_to_int(&record.data_value)?;
             if let Some(num) = value {
                 res.push(BeaDatum {
@@ -317,25 +327,26 @@ impl TryFrom<BeaDataRaw> for BeaData {
 
 impl From<Vec<BeaDatum>> for BeaData {
     fn from(records: Vec<BeaDatum>) -> Self {
-        tracing::info!("Calling From for BeaData.");
+        tracing::trace!("Calling From for BeaData.");
         Self { records }
     }
 }
 
 /// This functions removes commas and note tags (trailing 'E's) from BEA values.  Called by
 /// ['str_to_int'].
-fn remove_comma<'a, 'b>(value: &'a str, num: Option<String>) -> IResult<&'a str, Option<String>> {
+// fn remove_comma<'a, 'b>(value: &'a str, num: Option<String>) -> IResult<&'a str, Option<String>> {
+fn remove_comma(value: &str, num: Option<String>) -> IResult<&str, Option<String>> {
     let mut res = "".to_string();
     let mut out = None;
     if let Some(val) = num {
         res.push_str(&val);
     }
-    let val = value.chars().nth(0);
+    let val = value.chars().next();
     if let Some(chr) = val {
         if is_digit(chr as u8) {
             let (mut rem, val) = digit1(value)?;
             res.push_str(val);
-            if rem.len() > 0 {
+            if !rem.is_empty() {
                 (rem, _) = alt((tag(","), tag(" E")))(rem)?;
                 (rem, out) = remove_comma(rem, Some(res))?;
                 Ok((rem, out))
@@ -352,7 +363,7 @@ fn remove_comma<'a, 'b>(value: &'a str, num: Option<String>) -> IResult<&'a str,
 
 /// This function converts the string representation of a number where thousands are separated by
 /// commas into an integer type.  Calls ['remove_comma'].  Called by [`BeaData::try_from()`].
-fn str_to_int(value: &str) -> Result<Option<i64>, error::Error> {
+fn str_to_int(value: &str) -> Clean<Option<i64>> {
     let stub = "".to_string();
     if let Ok((_, res)) = remove_comma(value, Some(stub)) {
         if let Some(val) = res {
@@ -361,6 +372,6 @@ fn str_to_int(value: &str) -> Result<Option<i64>, error::Error> {
             Ok(None)
         }
     } else {
-        Err(error::Error::ParseError)
+        Err(Bandage::Parse)
     }
 }
