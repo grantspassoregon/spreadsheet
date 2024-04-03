@@ -1,6 +1,6 @@
 use aid::prelude::*;
-use spreadsheet::prelude::*;
 use spreadsheet::data::*;
+use spreadsheet::prelude::*;
 use tracing::{info, trace};
 
 #[test]
@@ -155,8 +155,7 @@ fn print_code_keys() -> Clean<()> {
         .collect::<Vec<String>>();
     keys.sort();
     keys.dedup();
-    let mut wtr =
-        csv::Writer::from_path("c:/users/erose/documents/bea/bea_cainc5n_code_keys.csv")?;
+    let mut wtr = csv::Writer::from_path("c:/users/erose/documents/bea/bea_cainc5n_code_keys.csv")?;
     for key in keys {
         wtr.serialize(key)?;
     }

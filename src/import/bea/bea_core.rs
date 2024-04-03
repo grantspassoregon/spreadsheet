@@ -7,7 +7,7 @@ use nom::character::complete::digit1;
 use nom::character::is_digit;
 use nom::IResult;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, time::Duration};
+use std::{collections::HashMap, path::Path, time::Duration};
 use tracing::{info, trace};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, PartialOrd)]
@@ -191,6 +191,26 @@ impl BeaData {
         Ok(())
     }
 
+    /// The `save` method serializes the contents of self into binary and writes to a file at
+    /// location `path`.  Errors bubble up from serialization in [`bincode`] or file system access during write.
+    pub fn save<P: AsRef<Path>>(&self, path: P) -> Clean<()> {
+        info!("Serializing to binary.");
+        let encode = bincode::serialize(self)?;
+        info!("Writing to file.");
+        std::fs::write(path, encode)?;
+        Ok(())
+    }
+
+    /// The `load` method deserializes the contents of a file at location `path` into [`BeaData`].
+    /// May error reading the file, for example if the location is invalid, or when deserializing
+    /// the binary if the format is invalid.
+    pub fn load<P: AsRef<Path>>(path: P) -> Clean<Self> {
+        info!("Deserializing from binary.");
+        let vec: Vec<u8> = std::fs::read(path)?;
+        let decode: Self = bincode::deserialize(&vec[..])?;
+        Ok(decode)
+    }
+
     /// This functions returns unique line code values from the `records` vector.
     pub fn linecode_keys(&self) -> Vec<String> {
         let mut keys = self
@@ -207,7 +227,8 @@ impl BeaData {
     pub fn linecode_hash(&self) -> HashMap<String, String> {
         let mut hash = HashMap::new();
         for record in self.records_ref() {
-            hash.entry(record.code()).or_insert_with(|| record.description());
+            hash.entry(record.code())
+                .or_insert_with(|| record.description());
             // if !hash.contains_key(&record.code()) {
             //     hash.insert(record.code(), record.description());
             // }
@@ -231,7 +252,8 @@ impl BeaData {
     pub fn geofips_hash(&self) -> HashMap<i32, String> {
         let mut hash = HashMap::new();
         for record in self.records_ref() {
-            hash.entry(record.geo_fips()).or_insert_with(|| record.geo_name());
+            hash.entry(record.geo_fips())
+                .or_insert_with(|| record.geo_name());
             // if !hash.contains_key(&record.geo_fips()) {
             //     hash.insert(record.geo_fips(), record.geo_name());
             // }
@@ -251,23 +273,44 @@ impl BeaData {
         keys
     }
 
-    /// Filters records in the struct based by comparing the string representation of values in the field specified in `filter` against the `test` value.  The `filter` field can take the values "year", "code", and "fips". 
+    /// Filters records in the struct based by comparing the string representation of values in the field specified in `filter` against the `test` value.  The `filter` field can take the values "year", "code", and "fips".
     pub fn filter(&self, filter: &str, test: &str) -> Self {
         trace!("Calling filter on {} records.", self.records_ref().len());
         let mut records = Vec::new();
         match filter {
             "year" => {
                 tracing::trace!("Filtering by year {}", test);
-                records.append(&mut self.records_ref().iter().filter(|d| format!("{}", d.time_period()).as_str() == test).cloned().collect::<Vec<BeaDatum>>())
-            },
+                records.append(
+                    &mut self
+                        .records_ref()
+                        .iter()
+                        .filter(|d| format!("{}", d.time_period()).as_str() == test)
+                        .cloned()
+                        .collect::<Vec<BeaDatum>>(),
+                )
+            }
             "code" => {
                 tracing::trace!("Filtering by code {}", test);
-                records.append(&mut self.records_ref().iter().filter(|d| d.code() == test).cloned().collect::<Vec<BeaDatum>>())
-            },
+                records.append(
+                    &mut self
+                        .records_ref()
+                        .iter()
+                        .filter(|d| d.code() == test)
+                        .cloned()
+                        .collect::<Vec<BeaDatum>>(),
+                )
+            }
             "fips" => {
                 tracing::trace!("Filtering by fips {}", test);
-                records.append(&mut self.records_ref().iter().filter(|d| format!("{}", d.geo_fips()).as_str() == test).cloned().collect::<Vec<BeaDatum>>())
-            },
+                records.append(
+                    &mut self
+                        .records_ref()
+                        .iter()
+                        .filter(|d| format!("{}", d.geo_fips()).as_str() == test)
+                        .cloned()
+                        .collect::<Vec<BeaDatum>>(),
+                )
+            }
             _ => tracing::warn!("Invalid filter provided."),
         }
         Self { records }

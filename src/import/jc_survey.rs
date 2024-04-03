@@ -1,6 +1,5 @@
-use crate::prelude::*;
-use aid::prelude::*;
 use address::prelude::*;
+use aid::prelude::*;
 use indicatif::ProgressBar;
 use serde::{Deserialize, Serialize};
 
@@ -62,7 +61,7 @@ pub struct JcSurveyRaw {
 impl JcSurveyRaw {
     /// Creates a new `JcSurveyRaw` struct from a CSV file located at `path`.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
-        let records = from_csv(path)?;
+        let records = crate::prelude::from_csv(path)?;
         Ok(JcSurveyRaw { records })
     }
 }
@@ -122,7 +121,7 @@ pub struct JcSurvey {
 impl JcSurvey {
     /// Creates a new `JcSurvey` struct from a CSV file located at `path`.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Clean<Self> {
-        let records = from_csv(path)?;
+        let records = crate::prelude::from_csv(path)?;
         let records = JcSurveyRaw { records };
         JcSurvey::try_from(&records)
     }
@@ -137,16 +136,16 @@ impl JcSurvey {
             let res = res.records();
             if !res.is_empty() && res[0].match_status() != MatchStatus::Missing {
                 // if res[0].match_status() != MatchStatus::Missing {
-                    let address = res[0].address_label();
-                    let option = item.option;
-                    let x_coordinate = res[0].longitude().unwrap();
-                    let y_coordinate = res[0].latitude().unwrap();
-                    records.push(JcSurveyExportItem {
-                        address,
-                        option,
-                        x_coordinate,
-                        y_coordinate,
-                    })
+                let address = res[0].address_label();
+                let option = item.option;
+                let x_coordinate = res[0].longitude().unwrap();
+                let y_coordinate = res[0].latitude().unwrap();
+                records.push(JcSurveyExportItem {
+                    address,
+                    option,
+                    x_coordinate,
+                    y_coordinate,
+                })
                 // }
             }
         }
@@ -215,7 +214,7 @@ impl JcSurveyExport {
     /// Write the contents of `JcSurveyExport` to a CSV file at location `title`.  Each element in
     /// the vector of type [`JcSurveyExportItem`] maps to a row of data on the CSV.
     pub fn to_csv(&mut self, title: std::path::PathBuf) -> Result<(), std::io::Error> {
-        to_csv(&mut self.records, title)?;
+        crate::prelude::to_csv(&mut self.records, title)?;
         Ok(())
     }
 }

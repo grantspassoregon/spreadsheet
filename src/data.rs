@@ -737,7 +737,6 @@ impl MailingListItem {
             Err(Bandage::Unknown)
         }
     }
-
 }
 
 /// The `MailingList` struct contains a `records` field that holds a vector of type

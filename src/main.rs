@@ -1,5 +1,5 @@
-use aid::prelude::*;
 use address::prelude::*;
+use aid::prelude::*;
 use clap::Parser;
 use spreadsheet::prelude::*;
 use tracing::{info, trace};
@@ -91,7 +91,7 @@ fn main() -> Clean<()> {
                 info!("Survey records: {}", records.records.len());
                 if let Some(file) = cli.data {
                     let city = CityAddresses::from_csv(file)?;
-                    let city = Addresses::try_from(city).unwrap();
+                    let city = Addresses::from(city);
                     info!("City addresses: {}", city.records_ref().len());
                     let mut matches = records.validate(&city);
                     if let Some(target) = cli.target {
