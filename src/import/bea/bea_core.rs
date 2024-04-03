@@ -206,8 +206,25 @@ impl BeaData {
     /// the binary if the format is invalid.
     pub fn load<P: AsRef<Path>>(path: P) -> Clean<Self> {
         info!("Deserializing from binary.");
+        let bar = ProgressBar::new_spinner();
+        bar.enable_steady_tick(Duration::from_millis(120));
+        bar.set_style(
+            ProgressStyle::with_template("{spinner:.blue} {msg}")
+                .unwrap()
+                .tick_strings(&[
+                    "▹▹▹▹▹",
+                    "▸▹▹▹▹",
+                    "▹▸▹▹▹",
+                    "▹▹▸▹▹",
+                    "▹▹▹▸▹",
+                    "▹▹▹▹▸",
+                    "▪▪▪▪▪",
+                ]),
+        );
+        bar.set_message("Loading...");
         let vec: Vec<u8> = std::fs::read(path)?;
         let decode: Self = bincode::deserialize(&vec[..])?;
+        bar.finish_with_message("Loaded!");
         Ok(decode)
     }
 
