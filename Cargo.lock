@@ -5,6 +5,7 @@ version = 3
 [[package]]
 name = "address"
 version = "0.1.0"
+source = "git+https://github.com/grantspassoregon/address.git#471ff9ff8f7a8ab42a8e6b1d9238483b999d9a7d"
 dependencies = [
  "aid",
  "clap 4.3.3",
