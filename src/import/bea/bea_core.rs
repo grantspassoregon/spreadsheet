@@ -7,7 +7,9 @@ use nom::character::complete::digit1;
 use nom::character::is_digit;
 use nom::IResult;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, path::Path, time::Duration};
+use std::{collections::HashMap, path::Path, time::Duration, fmt};
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
 use tracing::{info, trace};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, PartialOrd)]
@@ -75,6 +77,38 @@ impl BeaDataRaw {
     }
 }
 
+#[derive(EnumIter, Debug, PartialEq, Clone)]
+pub enum BeaColumns {
+    Code,
+    GeoFips,
+    GeoName,
+    TimePeriod,
+    Description,
+    Unit,
+    Value,
+}
+
+impl BeaColumns {
+    pub fn names() -> Vec<String> {
+        Self::iter().map(|v| format!("{}", v)).collect::<Vec<String>>()
+    }
+}
+
+impl fmt::Display for BeaColumns {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Code => write!(f, "Code"),
+            Self::GeoFips => write!(f, "Fips"),
+            Self::GeoName => write!(f, "Name"),
+            Self::TimePeriod => write!(f, "Year"),
+            Self::Description => write!(f, "Description"),
+            Self::Unit => write!(f, "Unit"),
+            Self::Value => write!(f, "Value"),
+        }
+    }
+    
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, PartialOrd)]
 #[serde(rename_all = "PascalCase")]
 /// The `BeaDatum` struct holds data processed from a [`BeaDatumRaw`] struct.
@@ -134,6 +168,30 @@ impl BeaDatum {
     /// of the field.
     pub fn data_value(&self) -> i64 {
         self.data_value
+    }
+
+    /// The `names` method returns the column names identified in [`BeaColumns`] for use as headers
+    /// in a table.
+    pub fn names() -> Vec<String> {
+        BeaColumns::names()
+    }
+
+    /// The `columns` method returns the column values identified in [`BeaColumns`] for use in a
+    /// table.
+    pub fn columns(&self) -> Vec<String> {
+        let mut values = Vec::new();
+        for column in BeaColumns::iter() {
+            match column {
+                BeaColumns::Code => values.push(format!("{}", self.code)),
+                BeaColumns::GeoFips => values.push(format!("{}", self.geo_fips)),
+                BeaColumns::GeoName => values.push(format!("{}", self.geo_name)),
+                BeaColumns::TimePeriod => values.push(format!("{}", self.time_period)),
+                BeaColumns::Description => values.push(format!("{}", self.description)),
+                BeaColumns::Unit => values.push(format!("{}", self.cl_unit)),
+                BeaColumns::Value => values.push(format!("{}", self.data_value)),
+            }
+        }
+        values
     }
 }
 
