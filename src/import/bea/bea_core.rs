@@ -7,7 +7,7 @@ use nom::character::complete::digit1;
 use nom::character::is_digit;
 use nom::IResult;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, path::Path, time::Duration, fmt};
+use std::{collections::{HashMap, BTreeMap}, path::Path, time::Duration, fmt};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 use tracing::{info, trace};
@@ -311,6 +311,16 @@ impl BeaData {
         hash
     }
 
+    /// This function returns a BTreeMap of line code keys and description values.
+    pub fn linecode_btree(&self) -> BTreeMap<String, String> {
+        let mut hash = BTreeMap::new();
+        for record in self.records_ref() {
+            hash.entry(record.code())
+                .or_insert_with(|| record.description());
+        }
+        hash
+    }
+
     /// This functions returns unique FIPS numbers from the `records` vector.
     pub fn geofips_keys(&self) -> Vec<i32> {
         let mut keys = self
@@ -329,12 +339,20 @@ impl BeaData {
         for record in self.records_ref() {
             hash.entry(record.geo_fips())
                 .or_insert_with(|| record.geo_name());
-            // if !hash.contains_key(&record.geo_fips()) {
-            //     hash.insert(record.geo_fips(), record.geo_name());
-            // }
         }
         hash
     }
+
+    /// This function returns a BTreeMap of geofips keys and description values.
+    pub fn geofips_btree(&self) -> BTreeMap<i32, String> {
+        let mut hash = BTreeMap::new();
+        for record in self.records_ref() {
+            hash.entry(record.geo_fips())
+                .or_insert_with(|| record.geo_name());
+        }
+        hash
+    }
+
 
     /// This function returns unique year values from the `records` vector.
     pub fn time_period_keys(&self) -> Vec<i32> {
