@@ -399,6 +399,12 @@ impl BeaData {
             .filter("code", code)
             .filter("fips", fips)
     }
+
+    /// The `names` method returns a vector of the header names identified in [`BeaColumns`] for
+    /// use in a table view.
+    pub fn names() -> Vec<String> {
+        BeaColumns::names()
+    }
 }
 
 impl TryFrom<BeaDataRaw> for BeaData {
