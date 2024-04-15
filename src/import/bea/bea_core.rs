@@ -386,6 +386,28 @@ impl BeaData {
                         .collect::<Vec<BeaDatum>>(),
                 )
             }
+            "location" => {
+                tracing::trace!("Filtering by location {}", test);
+                records.append(
+                    &mut self
+                        .records_ref()
+                        .iter()
+                        .filter(|d| format!("{}", d.geo_name()).as_str() == test)
+                        .cloned()
+                        .collect::<Vec<BeaDatum>>(),
+                )
+            }
+            "description" => {
+                tracing::trace!("Filtering by description {}", test);
+                records.append(
+                    &mut self
+                        .records_ref()
+                        .iter()
+                        .filter(|d| format!("{}", d.description()).as_str() == test)
+                        .cloned()
+                        .collect::<Vec<BeaDatum>>(),
+                )
+            }
             _ => tracing::warn!("Invalid filter provided."),
         }
         Self { records }
