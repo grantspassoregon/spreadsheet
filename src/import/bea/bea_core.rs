@@ -18,16 +18,24 @@ use tracing::{info, trace};
 pub struct BeaDatumRaw {
     // #[serde(deserialize_with = "crate::import::deserialize_code_keys")]
     // code: Cainc5nCodeKey,
-    code: String,
-    geo_fips: i32,
-    geo_name: String,
-    time_period: i32,
-    description: String,
+    /// The `code` field represents the BEA table code.
+    pub code: String,
+    /// The `geo_fips` field represents the FIPS number of the datum.
+    pub geo_fips: i32,
+    /// The `geo_name` field represents the FIPS description of the datum.
+    pub geo_name: String,
+    /// The `time_period` field represents the year of the datum.
+    pub time_period: i32,
+    /// The `description` contains a description of the data value.
+    pub description: String,
+    /// The `cl_unit` contains the unit of measure for the data value.
     #[serde(rename = "CL_UNIT")]
-    cl_unit: String,
+    pub cl_unit: String,
+    /// The `unit_mult` is the numeric factor representation of the unit of measure.
     #[serde(rename = "UNIT_MULT")]
-    unit_mult: i32,
-    data_value: String,
+    pub unit_mult: i32,
+    /// The `data_value` field represents the value of the datum.
+    pub data_value: String,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, PartialOrd)]
@@ -115,16 +123,22 @@ impl fmt::Display for BeaColumns {
 pub struct BeaDatum {
     // #[serde(deserialize_with = "crate::import::deserialize_code_keys")]
     // code: Cainc5nCodeKey,
-    code: String,
-    geo_fips: i32,
-    geo_name: String,
-    time_period: i32,
-    description: String,
-    #[serde(rename = "CL_UNIT")]
-    cl_unit: String,
-    #[serde(rename = "UNIT_MULT")]
-    unit_mult: i32,
-    data_value: i64,
+    /// The `code` field represents the BEA table code.
+    pub code: String,
+    /// The `geo_fips` field represents the FIPS number of the datum.
+    pub geo_fips: i32,
+    /// The `geo_name` field represents the FIPS description of the datum.
+    pub geo_name: String,
+    /// The `time_period` field represents the year of the datum.
+    pub time_period: i32,
+    /// The `description` contains a description of the data value.
+    pub description: String,
+    /// The `cl_unit` contains the unit of measure for the data value.
+    pub cl_unit: String,
+    /// The `unit_mult` is the numeric factor representation of the unit of measure.
+    pub unit_mult: i32,
+    /// The `data_value` field represents the value of the datum.
+    pub data_value: i64,
 }
 
 impl BeaDatum {
@@ -198,7 +212,8 @@ impl BeaDatum {
 /// The `BeaData` struct holds BEA data processed into library form.
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, PartialOrd)]
 pub struct BeaData {
-    records: Vec<BeaDatum>,
+    /// The `records` field holds a vector of type [`BeaDatum`].
+    pub records: Vec<BeaDatum>,
 }
 
 impl BeaData {
@@ -313,12 +328,12 @@ impl BeaData {
 
     /// This function returns a BTreeMap of line code keys and description values.
     pub fn linecode_btree(&self) -> BTreeMap<String, String> {
-        let mut hash = BTreeMap::new();
+        let mut tree = BTreeMap::new();
         for record in self.records_ref() {
-            hash.entry(record.code())
+            tree.entry(record.code())
                 .or_insert_with(|| record.description());
         }
-        hash
+        tree
     }
 
     /// This functions returns unique FIPS numbers from the `records` vector.
@@ -345,12 +360,12 @@ impl BeaData {
 
     /// This function returns a BTreeMap of geofips keys and description values.
     pub fn geofips_btree(&self) -> BTreeMap<i32, String> {
-        let mut hash = BTreeMap::new();
+        let mut tree = BTreeMap::new();
         for record in self.records_ref() {
-            hash.entry(record.geo_fips())
+            tree.entry(record.geo_fips())
                 .or_insert_with(|| record.geo_name());
         }
-        hash
+        tree
     }
 
 
@@ -428,6 +443,73 @@ impl BeaData {
             }
             _ => tracing::warn!("Invalid filter provided."),
         }
+        Self { records }
+    }
+
+    /// Filters records in the struct based by comparing the string representation of values in the field specified in `filter` against the values in the `test` parameter.  The `filter` field can take the values "year", "code", and "fips".
+    pub fn filter_many(&self, filter: &str, test: &[String]) -> Self {
+        trace!("Calling filter on {} records.", self.records_ref().len());
+        let mut records = Vec::new();
+        match filter {
+            "year" => {
+                tracing::trace!("Filtering by years {:?}", test);
+                records.append(
+                    &mut self
+                        .records_ref()
+                        .iter()
+                        .filter(|d| test.contains(&format!("{}", d.time_period())))
+                        .cloned()
+                        .collect::<Vec<BeaDatum>>()
+                );
+            },
+            "code" => {
+                tracing::trace!("Filtering by codes {:?}", test);
+                records.append(
+                    &mut self
+                        .records_ref()
+                        .iter()
+                        .filter(|d| test.contains(&format!("{}", d.code())))
+                        .cloned()
+                        .collect::<Vec<BeaDatum>>()
+                );
+            },
+            "fips" => {
+                tracing::trace!("Filtering by fips {:?}", test);
+                records.append(
+                    &mut self
+                        .records_ref()
+                        .iter()
+                        .filter(|d| test.contains(&format!("{}", d.geo_fips())))
+                        .cloned()
+                        .collect::<Vec<BeaDatum>>()
+                );
+            },
+            "location" => {
+                tracing::trace!("Filtering by locations {:?}", test);
+                records.append(
+                    &mut self
+                        .records_ref()
+                        .iter()
+                        .filter(|d| test.contains(&format!("{}", d.geo_name())))
+                        .cloned()
+                        .collect::<Vec<BeaDatum>>()
+                );
+            },
+            "description" => {
+                tracing::trace!("Filtering by descriptions {:?}", test);
+                records.append(
+                    &mut self
+                        .records_ref()
+                        .iter()
+                        .filter(|d| test.contains(&format!("{}", d.description())))
+                        .cloned()
+                        .collect::<Vec<BeaDatum>>()
+                );
+            },
+            _ => tracing::warn!("Invalid filter provided."),
+        }
+
+
         Self { records }
     }
 

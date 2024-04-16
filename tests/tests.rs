@@ -129,11 +129,13 @@ fn convert_raw_bea() -> Clean<()> {
     dotenv::dotenv().ok();
     let raw = std::env::var("BEA_CAINC5N_RAW")?;
     let csv = std::env::var("BEA_CAINC5N_CSV")?;
+    let dat = std::env::var("BEA_CAINC5N_DAT")?;
 
     let records = BeaDataRaw::from_csv(raw)?;
     let mut records = BeaData::try_from(records)?;
     info!("Records: {:?}", records.records_ref().len());
     records.to_csv(csv)?;
+    records.save(dat)?;
     Ok(())
 }
 
@@ -156,6 +158,54 @@ fn print_code_keys() -> Clean<()> {
     keys.sort();
     keys.dedup();
     let mut wtr = csv::Writer::from_path("c:/users/erose/documents/bea/bea_cainc5n_code_keys.csv")?;
+    for key in keys {
+        wtr.serialize(key)?;
+    }
+    wtr.flush()?;
+    Ok(())
+}
+
+#[test]
+fn print_fips_tree() -> Clean<()> {
+    if let Ok(()) = tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::TRACE)
+        .try_init()
+    {};
+    trace!("Subscriber initialized.");
+    dotenv::dotenv().ok();
+    let dat = std::env::var("BEA_CAINC5N_DAT")?;
+    let mut records = BeaData::load(dat)?;
+    let mut keys = records
+        .records_mut()
+        .iter()
+        .map(|r| r.geo_fips)
+        .collect::<Vec<i32>>();
+    keys.sort();
+    keys.dedup();
+    let mut wtr = csv::Writer::from_path("tests/test_data/bea_fips.csv")?;
+    for key in keys {
+        wtr.serialize(key)?;
+    }
+    wtr.flush()?;
+    Ok(())
+}
+
+#[test]
+fn print_fips_tree2() -> Clean<()> {
+    if let Ok(()) = tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .try_init()
+    {};
+    trace!("Subscriber initialized.");
+    let mut records = BeaData::try_from(BeaDataRaw::from_csv("tests/test_data/bea.csv")?)?;
+    let mut keys = records
+        .records_mut()
+        .iter()
+        .map(|r| r.geo_fips)
+        .collect::<Vec<i32>>();
+    keys.sort();
+    keys.dedup();
+    let mut wtr = csv::Writer::from_path("tests/test_data/bea_fips.csv")?;
     for key in keys {
         wtr.serialize(key)?;
     }
