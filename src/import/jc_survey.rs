@@ -129,10 +129,10 @@ impl JcSurvey {
     /// Matches the [`PartialAddress`] in the `address` field of each `JcSurveyItem` in the
     /// `records` field of the `JcSurvey` object against the addresses in `other`.  The method
     /// gathers complete and partial address matches into a [`JcSurveyExport`] struct.
-    pub fn validate(&self, other: &Addresses) -> JcSurveyExport {
+    pub fn validate(&self, other: &SpatialAddresses) -> JcSurveyExport {
         let mut records = Vec::new();
         for item in self.records.clone() {
-            let res = MatchPartialRecord::compare(&item.address, other);
+            let res = MatchPartialRecord::compare(&item.address, &other.records);
             let res = res.records();
             if !res.is_empty() && res[0].match_status() != MatchStatus::Missing {
                 // if res[0].match_status() != MatchStatus::Missing {

@@ -90,9 +90,9 @@ fn main() -> Clean<()> {
                 let records = JcSurvey::from_csv(path)?;
                 info!("Survey records: {}", records.records.len());
                 if let Some(file) = cli.data {
-                    let city = CityAddresses::from_csv(file)?;
-                    let city = Addresses::from(city);
-                    info!("City addresses: {}", city.records_ref().len());
+                    let city = GrantsPassSpatialAddresses::from_csv(file)?;
+                    let city = SpatialAddresses::from(&city.records[..]);
+                    info!("City addresses: {}", city.records.len());
                     let mut matches = records.validate(&city);
                     if let Some(target) = cli.target {
                         matches.to_csv(target)?;
