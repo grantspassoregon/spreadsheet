@@ -7,7 +7,12 @@ use nom::character::complete::digit1;
 use nom::character::is_digit;
 use nom::IResult;
 use serde::{Deserialize, Serialize};
-use std::{collections::{HashMap, BTreeMap}, path::Path, time::Duration, fmt};
+use std::{
+    collections::{BTreeMap, HashMap},
+    fmt,
+    path::Path,
+    time::Duration,
+};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 use tracing::{info, trace};
@@ -98,7 +103,9 @@ pub enum BeaColumns {
 
 impl BeaColumns {
     pub fn names() -> Vec<String> {
-        Self::iter().map(|v| format!("{}", v)).collect::<Vec<String>>()
+        Self::iter()
+            .map(|v| format!("{}", v))
+            .collect::<Vec<String>>()
     }
 }
 
@@ -114,7 +121,6 @@ impl fmt::Display for BeaColumns {
             Self::Value => write!(f, "Value"),
         }
     }
-    
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, PartialOrd)]
@@ -368,7 +374,6 @@ impl BeaData {
         tree
     }
 
-
     /// This function returns unique year values from the `records` vector.
     pub fn time_period_keys(&self) -> Vec<i32> {
         let mut keys = self
@@ -459,9 +464,9 @@ impl BeaData {
                         .iter()
                         .filter(|d| test.contains(&format!("{}", d.time_period())))
                         .cloned()
-                        .collect::<Vec<BeaDatum>>()
+                        .collect::<Vec<BeaDatum>>(),
                 );
-            },
+            }
             "code" => {
                 tracing::trace!("Filtering by codes {:?}", test);
                 records.append(
@@ -470,9 +475,9 @@ impl BeaData {
                         .iter()
                         .filter(|d| test.contains(&format!("{}", d.code())))
                         .cloned()
-                        .collect::<Vec<BeaDatum>>()
+                        .collect::<Vec<BeaDatum>>(),
                 );
-            },
+            }
             "fips" => {
                 tracing::trace!("Filtering by fips {:?}", test);
                 records.append(
@@ -481,9 +486,9 @@ impl BeaData {
                         .iter()
                         .filter(|d| test.contains(&format!("{}", d.geo_fips())))
                         .cloned()
-                        .collect::<Vec<BeaDatum>>()
+                        .collect::<Vec<BeaDatum>>(),
                 );
-            },
+            }
             "location" => {
                 tracing::trace!("Filtering by locations {:?}", test);
                 records.append(
@@ -492,9 +497,9 @@ impl BeaData {
                         .iter()
                         .filter(|d| test.contains(&format!("{}", d.geo_name())))
                         .cloned()
-                        .collect::<Vec<BeaDatum>>()
+                        .collect::<Vec<BeaDatum>>(),
                 );
-            },
+            }
             "description" => {
                 tracing::trace!("Filtering by descriptions {:?}", test);
                 records.append(
@@ -503,12 +508,11 @@ impl BeaData {
                         .iter()
                         .filter(|d| test.contains(&format!("{}", d.description())))
                         .cloned()
-                        .collect::<Vec<BeaDatum>>()
+                        .collect::<Vec<BeaDatum>>(),
                 );
-            },
+            }
             _ => tracing::warn!("Invalid filter provided."),
         }
-
 
         Self { records }
     }
