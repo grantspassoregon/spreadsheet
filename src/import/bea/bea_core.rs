@@ -90,18 +90,28 @@ impl BeaDataRaw {
     }
 }
 
+/// The `BeaColumns` enum delineates fields in [`BeaDatum`] intended for display in a table.
 #[derive(EnumIter, Debug, PartialEq, Clone)]
 pub enum BeaColumns {
+    /// Corresponds to the code key from [`BeaDatum`].
     Code,
+    /// Corresponds to the geofips field from [`BeaDatum`]
     GeoFips,
+    /// Corresponds to the geo_name field from [`BeaDatum`]
     GeoName,
+    /// Corresponds to the time_period field from [`BeaDatum`]
     TimePeriod,
+    /// Corresponds to the description field from [`BeaDatum`]
     Description,
+    /// Corresponds to the unit description from [`BeaDatum`]
     Unit,
+    /// Corresponds to the value field from [`BeaDatum`]
     Value,
 }
 
 impl BeaColumns {
+    /// Returns a string representation of the variant, functions to produce header names for table
+    /// display.
     pub fn names() -> Vec<String> {
         Self::iter()
             .map(|v| format!("{}", v))

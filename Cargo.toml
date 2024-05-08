@@ -12,7 +12,7 @@ path = "src/main.rs"
 name = "spreadsheet"
 
 [dependencies]
-aid = { git = "https://github.com/grantspassoregon/aid.git", features = ["bin", "csvs"] }
+aid = { git = "https://github.com/grantspassoregon/aid.git", default-features = false, features = ["bin", "csvs"] }
 address = { git = "https://github.com/grantspassoregon/address.git" }
 clap = { version = "4.1.1", features = ["derive"] }
 csv = "1.3.0"

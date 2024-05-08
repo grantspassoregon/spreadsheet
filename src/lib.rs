@@ -15,8 +15,8 @@ pub mod prelude {
         MailingList, MailingListExport, MailingListExportItem, MailingListItem,
     };
     pub use crate::import::{
-        BeaData, BeaDataRaw, BeaDatum, BeaDatumRaw, CityTaxlot, CityTaxlots, CountyTaxlot,
-        CountyTaxlots, JcSurvey,
+        BeaColumns, BeaData, BeaDataRaw, BeaDatum, BeaDatumRaw, CityTaxlot, CityTaxlots,
+        CountyTaxlot, CountyTaxlots, JcSurvey,
     };
     pub use crate::utils::{from_csv, to_csv};
 }
