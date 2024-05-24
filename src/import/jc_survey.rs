@@ -133,7 +133,7 @@ impl JcSurvey {
         let mut records = Vec::new();
         for item in self.records.clone() {
             let res = MatchPartialRecord::compare(&item.address, &other.records);
-            let res = res.records();
+            let res = res.values();
             if !res.is_empty() && res[0].match_status() != MatchStatus::Missing {
                 // if res[0].match_status() != MatchStatus::Missing {
                 let address = res[0].address_label();

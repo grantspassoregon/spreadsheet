@@ -1,3 +1,4 @@
+use address::business::BusinessMatchRecords;
 use aid::prelude::*;
 use spreadsheet::data::*;
 use spreadsheet::prelude::*;
@@ -79,6 +80,28 @@ fn license_code() -> Result<(), std::io::Error> {
     let license = records.records_ref()[0].license();
     let code = records.code(&license);
     info!("Code is: {:?}", code);
+
+    Ok(())
+}
+
+#[test]
+fn business_info_from_matches() -> Result<(), std::io::Error> {
+    if let Ok(()) = tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::TRACE)
+        .try_init()
+    {};
+    trace!("Subscriber initialized.");
+
+    let file = "c:/users/erose/Documents/business_matches.csv";
+    let businesses = BusinessMatchRecords::from_csv(file)?;
+    info!("Match records read.");
+    let file = "tests/test_data/business_categories.csv";
+    let codes = IndustryCodes::from_csv(file)?;
+    info!("Industry codes read.");
+    let mut businesses_info = BusinessesInfo::from_matches(&businesses, &codes);
+    info!("Records: {:?}", businesses_info.records_ref().len());
+    businesses_info.to_csv("tests/test_data/businesses_export.csv".into())?;
+    info!("Businesses info written to csv.");
 
     Ok(())
 }

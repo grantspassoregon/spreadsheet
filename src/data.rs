@@ -487,6 +487,67 @@ impl BusinessInfo {
             y_coordinate,
         }
     }
+
+    /// The `from_match` method converts a [`address::prelude::BusinessMatchRecord`] to a
+    /// `BusinessInfo` struct.
+    pub fn from_match(
+        business: &address::prelude::BusinessMatchRecord,
+        codes: &IndustryCodes,
+    ) -> Self {
+        let company_name = if let Some(name) = business.company_name() {
+            name
+        } else {
+            String::new()
+        };
+        let contact_name = business.contact_name();
+        let dba = business.dba();
+        let street_address_label = business.business_address_label();
+        let license = business.license();
+        let industry_code = business.industry_code() as i32;
+        let industry = IndustryCode::from_code(industry_code, codes);
+        let industry_name = industry.name.clone();
+        let sector_code = industry.sector_code();
+        let sector_name = industry.sector().clone();
+        let subsector_code = industry.subsector_code();
+        let subsector_name = industry.subsector();
+        let tourism = industry.tourism();
+        let notes = None;
+        let created_user = None;
+        let created_date = None;
+        let last_edited_user = None;
+        let last_edited_date = None;
+        let x_coordinate = if let Some(long) = business.longitude() {
+            long
+        } else {
+            0.
+        };
+        let y_coordinate = if let Some(lat) = business.latitude() {
+            lat
+        } else {
+            0.
+        };
+        BusinessInfo {
+            company_name,
+            contact_name,
+            dba,
+            street_address_label,
+            license,
+            industry_code,
+            industry_name,
+            sector_code,
+            sector_name,
+            subsector_code,
+            subsector_name,
+            tourism,
+            notes,
+            created_user,
+            created_date,
+            last_edited_user,
+            last_edited_date,
+            x_coordinate,
+            y_coordinate,
+        }
+    }
 }
 
 /// The `BusinessesInfo` struct contains a `records` field that holds a vector of type
@@ -497,6 +558,20 @@ pub struct BusinessesInfo {
 }
 
 impl BusinessesInfo {
+    /// Creates a new `BusinessesInfo` from [`address::prelude::BusinessMatchRecords`] and an
+    /// [`IndustryCodes`] struct.
+    pub fn from_matches(
+        businesses: &address::prelude::BusinessMatchRecords,
+        codes: &IndustryCodes,
+    ) -> Self {
+        let records = businesses
+            .records
+            .iter()
+            .map(|r| BusinessInfo::from_match(r, codes))
+            .collect::<Vec<BusinessInfo>>();
+        BusinessesInfo { records }
+    }
+
     /// Creates a new `BusinessesInfo` from a [`Businesses`] struct, an [`ActiveLicenses`] struct, and
     /// an [`IndustryCodes`] struct.
     pub fn from_license(

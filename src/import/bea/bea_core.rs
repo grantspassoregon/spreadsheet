@@ -212,12 +212,12 @@ impl BeaDatum {
         let mut values = Vec::new();
         for column in BeaColumns::iter() {
             match column {
-                BeaColumns::Code => values.push(format!("{}", self.code)),
-                BeaColumns::GeoFips => values.push(format!("{}", self.geo_fips)),
-                BeaColumns::GeoName => values.push(format!("{}", self.geo_name)),
-                BeaColumns::TimePeriod => values.push(format!("{}", self.time_period)),
-                BeaColumns::Description => values.push(format!("{}", self.description)),
-                BeaColumns::Unit => values.push(format!("{}", self.cl_unit)),
+                BeaColumns::Code => values.push(self.code.to_string()),
+                BeaColumns::GeoFips => values.push(self.geo_fips.to_string()),
+                BeaColumns::GeoName => values.push(self.geo_name.to_string()),
+                BeaColumns::TimePeriod => values.push(self.time_period.to_string()),
+                BeaColumns::Description => values.push(self.description.to_string()),
+                BeaColumns::Unit => values.push(self.cl_unit.to_string()),
                 BeaColumns::Value => values.push(format!("{}", self.data_value)),
             }
         }
@@ -440,7 +440,7 @@ impl BeaData {
                     &mut self
                         .records_ref()
                         .iter()
-                        .filter(|d| format!("{}", d.geo_name()).as_str() == test)
+                        .filter(|d| d.geo_name().to_string().as_str() == test)
                         .cloned()
                         .collect::<Vec<BeaDatum>>(),
                 )
@@ -451,7 +451,7 @@ impl BeaData {
                     &mut self
                         .records_ref()
                         .iter()
-                        .filter(|d| format!("{}", d.description()).as_str() == test)
+                        .filter(|d| d.description().to_string().as_str() == test)
                         .cloned()
                         .collect::<Vec<BeaDatum>>(),
                 )
@@ -483,7 +483,7 @@ impl BeaData {
                     &mut self
                         .records_ref()
                         .iter()
-                        .filter(|d| test.contains(&format!("{}", d.code())))
+                        .filter(|d| test.contains(&d.code().to_string()))
                         .cloned()
                         .collect::<Vec<BeaDatum>>(),
                 );
@@ -505,7 +505,7 @@ impl BeaData {
                     &mut self
                         .records_ref()
                         .iter()
-                        .filter(|d| test.contains(&format!("{}", d.geo_name())))
+                        .filter(|d| test.contains(&d.geo_name().to_string()))
                         .cloned()
                         .collect::<Vec<BeaDatum>>(),
                 );
@@ -516,7 +516,7 @@ impl BeaData {
                     &mut self
                         .records_ref()
                         .iter()
-                        .filter(|d| test.contains(&format!("{}", d.description())))
+                        .filter(|d| test.contains(&d.description().to_string()))
                         .cloned()
                         .collect::<Vec<BeaDatum>>(),
                 );
