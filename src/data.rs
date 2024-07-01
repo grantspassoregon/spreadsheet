@@ -392,6 +392,11 @@ pub struct BusinessInfo {
 }
 
 impl BusinessInfo {
+    /// The `license` method returns a reference to the `license` field, containing the business
+    /// license identifier of the business.
+    pub fn license(&self) -> &String {
+        &self.license
+    }
     /// Creates a new `BusinessInfo` from a [`Business`] struct, an [`ActiveLicenses`] struct, and
     /// an [`IndustryCodes`] struct.
     pub fn from_license(
@@ -494,11 +499,7 @@ impl BusinessInfo {
         business: &address::prelude::BusinessMatchRecord,
         codes: &IndustryCodes,
     ) -> Self {
-        let company_name = if let Some(name) = business.company_name() {
-            name
-        } else {
-            String::new()
-        };
+        let company_name = business.company_name().unwrap_or_default();
         let contact_name = business.contact_name();
         let dba = business.dba();
         let street_address_label = business.business_address_label();
@@ -565,7 +566,6 @@ impl BusinessesInfo {
         codes: &IndustryCodes,
     ) -> Self {
         let records = businesses
-            .records
             .iter()
             .map(|r| BusinessInfo::from_match(r, codes))
             .collect::<Vec<BusinessInfo>>();

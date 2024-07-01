@@ -1,4 +1,6 @@
+use address::business::BusinessLicenses;
 use address::business::BusinessMatchRecords;
+use address::prelude::to_csv;
 use aid::prelude::*;
 use spreadsheet::data::*;
 use spreadsheet::prelude::*;
@@ -233,5 +235,47 @@ fn print_fips_tree2() -> Clean<()> {
         wtr.serialize(key)?;
     }
     wtr.flush()?;
+    Ok(())
+}
+
+#[test]
+fn business_mailing() -> Clean<()> {
+    if let Ok(()) = tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::TRACE)
+        .try_init()
+    {};
+    trace!("Subscriber initialized.");
+
+    let situs = "c:/users/erose/documents/redwood_business_mailing_list.csv";
+    let situs = BusinessesInfo::from_csv(situs)?;
+    info!("Businesses read: {}.", situs.records_ref().len());
+    let mailing = "c:/users/erose/documents/business_licenses_mailing_20240530.csv";
+    let mailing = BusinessLicenses::from_csv(mailing)?;
+    info!("Business licenses loaded: {} entries.", mailing.len());
+    let mut mailing = mailing.deduplicate();
+    mailing.detype_subaddresses()?;
+    info!("Business licenses deduplicated: {} entries.", mailing.len());
+
+    let mut mail = Vec::new();
+    let mut missing = Vec::new();
+    for site in situs.records_ref() {
+        let matching = mailing.clone().filter("license", site.license());
+        if !matching.is_empty() {
+            mail.push(matching[0].clone());
+        } else {
+            missing.push(site);
+        }
+    }
+    tracing::info!("Mailing list: {} records", mail.len());
+    to_csv(
+        &mut mail,
+        "c:/users/erose/documents/business_mailing_20240530.csv".into(),
+    )?;
+    tracing::info!("Missing: {} records", missing.len());
+    to_csv(
+        &mut missing,
+        "c:/users/erose/documents/business_mailing_missing_20240530.csv".into(),
+    )?;
+
     Ok(())
 }

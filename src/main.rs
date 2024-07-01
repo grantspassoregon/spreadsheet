@@ -91,8 +91,8 @@ fn main() -> Clean<()> {
                 info!("Survey records: {}", records.records.len());
                 if let Some(file) = cli.data {
                     let city = GrantsPassSpatialAddresses::from_csv(file)?;
-                    let city = SpatialAddresses::from(&city.records[..]);
-                    info!("City addresses: {}", city.records.len());
+                    let city = SpatialAddresses::from(&city[..]);
+                    info!("City addresses: {}", city.len());
                     let mut matches = records.validate(&city);
                     if let Some(target) = cli.target {
                         matches.to_csv(target)?;

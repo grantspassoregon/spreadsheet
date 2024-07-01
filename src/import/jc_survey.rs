@@ -85,7 +85,7 @@ impl TryFrom<&JcSurveyRawItem> for JcSurveyItem {
     fn try_from(raw: &JcSurveyRawItem) -> Clean<Self> {
         let city = raw.city.clone();
         if let Some(raw_address) = raw.address.clone() {
-            match parse_address(&raw_address.to_uppercase()) {
+            match Parser::address(&raw_address.to_uppercase()) {
                 Ok((_, addr)) => {
                     tracing::trace!("Parsed to {:#?}", &addr);
                     let mut address = addr.clone();
@@ -132,8 +132,7 @@ impl JcSurvey {
     pub fn validate(&self, other: &SpatialAddresses) -> JcSurveyExport {
         let mut records = Vec::new();
         for item in self.records.clone() {
-            let res = MatchPartialRecord::compare(&item.address, &other.records);
-            let res = res.values();
+            let res = MatchPartialRecord::compare(&item.address, other);
             if !res.is_empty() && res[0].match_status() != MatchStatus::Missing {
                 // if res[0].match_status() != MatchStatus::Missing {
                 let address = res[0].address_label();
