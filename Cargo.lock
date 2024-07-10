@@ -30,7 +30,7 @@ dependencies = [
 [[package]]
 name = "address"
 version = "0.1.0"
-source = "git+https://github.com/grantspassoregon/address.git#7d2fa229531d01ee2d57d101ac05ef9f05c5ca2b"
+source = "git+https://github.com/grantspassoregon/address.git#62dc5294f7fd7499b2f3f835059866a35b64863d"
 dependencies = [
  "aid",
  "bincode",
