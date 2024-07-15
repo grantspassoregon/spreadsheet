@@ -1,4 +1,5 @@
 use crate::utils;
+use derive_more::{Deref, DerefMut};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use tracing::warn;
@@ -142,41 +143,21 @@ impl CountyTaxlot {
 
 /// The `CountyTaxlots` struct holds a `records` field that contains a vector of type
 /// [`CountyTaxlot`].
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct CountyTaxlots {
-    records: Vec<CountyTaxlot>,
-}
+#[derive(Debug, Clone, Default, Serialize, Deserialize, Deref, DerefMut)]
+pub struct CountyTaxlots(Vec<CountyTaxlot>);
 
 impl CountyTaxlots {
     /// Writes the contents of [`CountyTaxlots`] to a CSV file at the location specified in `path`.
     /// Each element in the vector of type [`CountyTaxlot`] maps to a row on the spreadsheet.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
         let records = utils::from_csv(path)?;
-        Ok(CountyTaxlots { records })
-    }
-
-    /// The `records` field holds a vector of type [`CountyTaxlot`].  This function returns the
-    /// cloned value of the field.
-    pub fn records(&self) -> Vec<CountyTaxlot> {
-        self.records.clone()
-    }
-
-    /// This function returns a reference to the vector of type [`CountyTaxlot`] in the `records` field.
-    pub fn records_ref(&self) -> &Vec<CountyTaxlot> {
-        &self.records
-    }
-
-    /// This function returns a mutable reference to the vector of type [`CountyTaxlot`] in the
-    /// `records` field.
-    pub fn records_mut(&mut self) -> &mut Vec<CountyTaxlot> {
-        &mut self.records
+        Ok(CountyTaxlots(records))
     }
 
     /// The `addresses()` method returns the `address` field from each element of [`CountyTaxlot`]
     /// collected into a vector of type `String`.
     pub fn addresses(&self) -> Vec<String> {
-        self.records_ref()
-            .par_iter()
+        self.par_iter()
             .map(|v| v.address())
             .collect::<Vec<String>>()
     }
@@ -184,8 +165,7 @@ impl CountyTaxlots {
     /// The `owner_names()` method returns the `owner_name` field from each element of [`CountyTaxlot`]
     /// collected into a vector of type `String`.
     pub fn owner_names(&self) -> Vec<String> {
-        self.records_ref()
-            .par_iter()
+        self.par_iter()
             .map(|v| v.owner_name())
             .collect::<Vec<String>>()
     }
@@ -193,7 +173,6 @@ impl CountyTaxlots {
     /// Returns a vector of unique addresses associated with a given property owner `name`.
     pub fn associated_addresses(&self, name: &str) -> Vec<String> {
         let mut res = self
-            .records_ref()
             .par_iter()
             .filter(|v| v.owner_name() == name)
             .map(|v| v.address())
@@ -209,7 +188,6 @@ impl CountyTaxlots {
     /// Returns a vector of unique owner names associated with a given address `address`.
     pub fn associated_names(&self, address: &str) -> Vec<String> {
         let mut res = self
-            .records_ref()
             .par_iter()
             .filter(|v| v.address() == address)
             .map(|v| v.owner_name())

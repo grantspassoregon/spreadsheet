@@ -51,7 +51,7 @@ fn main() -> Clean<()> {
             dotenv::dotenv().ok();
             let path = std::env::var("BEA_CAINC5N_CSV")?;
             let records = BeaData::from_csv(path)?;
-            info!("Records: {}", records.records_ref().len());
+            info!("Records: {}", records.len());
             let hash = records.linecode_hash();
             info!("Hash is {:#?}", hash);
         }
@@ -65,19 +65,18 @@ fn main() -> Clean<()> {
             if let Some(path) = cli.source {
                 records.to_csv(path)?;
             }
-            info!("Records: {}", records.records_ref().len());
+            info!("Records: {}", records.len());
         }
         "load_parcels" => {
             if let Some(path) = cli.source {
                 info!("Importing county taxlots.");
                 let records = CountyTaxlots::from_csv(path)?;
-                info!("Records: {}", records.records_ref().len());
+                info!("Records: {}", records.len());
                 let mail = MailingList::try_from(&records)?;
-                info!("Records processed: {}", mail.records_ref().len());
+                info!("Records processed: {}", mail.len());
                 let mut mail = MailingListExport::from(&mail);
                 mail.sort_by_key("properties");
-                let mail: Vec<MailingListExportItem> =
-                    mail.records_ref().iter().rev().cloned().collect();
+                let mail: Vec<MailingListExportItem> = mail.iter().rev().cloned().collect();
                 let mut mail = MailingListExport::new(mail);
                 if let Some(file) = cli.target {
                     mail.to_csv(&file)?;

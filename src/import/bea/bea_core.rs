@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use aid::prelude::*;
+use derive_more::{Deref, DerefMut};
 use indicatif::{ProgressBar, ProgressStyle};
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -43,29 +44,11 @@ pub struct BeaDatumRaw {
     pub data_value: String,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, PartialOrd, Deref, DerefMut)]
 /// The `BeaDataRaw` struct contains a `records` field that holds a vector of type [`BeaDatumRaw`].
-pub struct BeaDataRaw {
-    records: Vec<BeaDatumRaw>,
-}
+pub struct BeaDataRaw(Vec<BeaDatumRaw>);
 
 impl BeaDataRaw {
-    /// The `records` field holds a vector of type [`BeaDatumRaw`].  This function returns the
-    /// cloned value of the field.
-    pub fn records(&self) -> Vec<BeaDatumRaw> {
-        self.records.clone()
-    }
-
-    /// This method returns a reference to the `records` field.
-    pub fn records_ref(&self) -> &Vec<BeaDatumRaw> {
-        &self.records
-    }
-
-    /// This method returns a mutable reference to the `records` field.
-    pub fn records_mut(&mut self) -> &mut Vec<BeaDatumRaw> {
-        &mut self.records
-    }
-
     /// This method loads a `BeaDataRaw` from a CSV located at `path`.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
         let bar = ProgressBar::new_spinner();
@@ -86,7 +69,7 @@ impl BeaDataRaw {
         bar.set_message("Loading...");
         let records = from_csv(path)?;
         bar.finish_with_message("Loaded!");
-        Ok(BeaDataRaw { records })
+        Ok(BeaDataRaw(records))
     }
 }
 
@@ -226,29 +209,10 @@ impl BeaDatum {
 }
 
 /// The `BeaData` struct holds BEA data processed into library form.
-#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, PartialOrd)]
-pub struct BeaData {
-    /// The `records` field holds a vector of type [`BeaDatum`].
-    pub records: Vec<BeaDatum>,
-}
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, PartialOrd, Deref, DerefMut)]
+pub struct BeaData(Vec<BeaDatum>);
 
 impl BeaData {
-    /// The `records` field holds a vector of type [`BeaDatum`].  This function returns the
-    /// cloned value of the field.
-    pub fn records(&self) -> Vec<BeaDatum> {
-        self.records.clone()
-    }
-
-    /// This method returns a reference to the `records` field.
-    pub fn records_ref(&self) -> &Vec<BeaDatum> {
-        &self.records
-    }
-
-    /// This method returns a mutable reference to the `records` field.
-    pub fn records_mut(&mut self) -> &mut Vec<BeaDatum> {
-        &mut self.records
-    }
-
     /// This method loads a `BeaData` from a CSV located at `path`.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
         let bar = ProgressBar::new_spinner();
@@ -269,14 +233,14 @@ impl BeaData {
         bar.set_message("Loading...");
         let records = from_csv(path)?;
         bar.finish_with_message("Loaded!");
-        Ok(BeaData { records })
+        Ok(BeaData(records))
     }
 
     /// This method writes the vector of type [`BeaDatum`] in the `records` field of `BeaData` to a
     /// CSV file at location `title`.  Each element in the vector will become a row in the
     /// spreadsheet.
     pub fn to_csv<P: AsRef<std::path::Path>>(&mut self, title: P) -> Result<(), std::io::Error> {
-        to_csv(self.records_mut(), title)?;
+        to_csv(self, title)?;
         Ok(())
     }
 
@@ -319,11 +283,7 @@ impl BeaData {
 
     /// This functions returns unique line code values from the `records` vector.
     pub fn linecode_keys(&self) -> Vec<String> {
-        let mut keys = self
-            .records_ref()
-            .iter()
-            .map(|r| r.code())
-            .collect::<Vec<String>>();
+        let mut keys = self.iter().map(|r| r.code()).collect::<Vec<String>>();
         keys.sort();
         keys.dedup();
         keys
@@ -332,7 +292,7 @@ impl BeaData {
     /// This function returns a HashMap of line code keys and description values.
     pub fn linecode_hash(&self) -> HashMap<String, String> {
         let mut hash = HashMap::new();
-        for record in self.records_ref() {
+        for record in self.iter() {
             hash.entry(record.code())
                 .or_insert_with(|| record.description());
             // if !hash.contains_key(&record.code()) {
@@ -345,7 +305,7 @@ impl BeaData {
     /// This function returns a BTreeMap of line code keys and description values.
     pub fn linecode_btree(&self) -> BTreeMap<String, String> {
         let mut tree = BTreeMap::new();
-        for record in self.records_ref() {
+        for record in self.iter() {
             tree.entry(record.code())
                 .or_insert_with(|| record.description());
         }
@@ -354,11 +314,7 @@ impl BeaData {
 
     /// This functions returns unique FIPS numbers from the `records` vector.
     pub fn geofips_keys(&self) -> Vec<i32> {
-        let mut keys = self
-            .records_ref()
-            .iter()
-            .map(|r| r.geo_fips())
-            .collect::<Vec<i32>>();
+        let mut keys = self.iter().map(|r| r.geo_fips()).collect::<Vec<i32>>();
         keys.sort();
         keys.dedup();
         keys
@@ -367,7 +323,7 @@ impl BeaData {
     /// This function returns a HashMap of geofips keys and description values.
     pub fn geofips_hash(&self) -> HashMap<i32, String> {
         let mut hash = HashMap::new();
-        for record in self.records_ref() {
+        for record in self.iter() {
             hash.entry(record.geo_fips())
                 .or_insert_with(|| record.geo_name());
         }
@@ -377,7 +333,7 @@ impl BeaData {
     /// This function returns a BTreeMap of geofips keys and description values.
     pub fn geofips_btree(&self) -> BTreeMap<i32, String> {
         let mut tree = BTreeMap::new();
-        for record in self.records_ref() {
+        for record in self.iter() {
             tree.entry(record.geo_fips())
                 .or_insert_with(|| record.geo_name());
         }
@@ -386,11 +342,7 @@ impl BeaData {
 
     /// This function returns unique year values from the `records` vector.
     pub fn time_period_keys(&self) -> Vec<i32> {
-        let mut keys = self
-            .records_ref()
-            .iter()
-            .map(|r| r.time_period())
-            .collect::<Vec<i32>>();
+        let mut keys = self.iter().map(|r| r.time_period()).collect::<Vec<i32>>();
         keys.sort();
         keys.dedup();
         keys
@@ -398,14 +350,13 @@ impl BeaData {
 
     /// Filters records in the struct based by comparing the string representation of values in the field specified in `filter` against the `test` value.  The `filter` field can take the values "year", "code", and "fips".
     pub fn filter(&self, filter: &str, test: &str) -> Self {
-        trace!("Calling filter on {} records.", self.records_ref().len());
+        trace!("Calling filter on {} records.", self.len());
         let mut records = Vec::new();
         match filter {
             "year" => {
                 tracing::trace!("Filtering by year {}", test);
                 records.append(
                     &mut self
-                        .records_ref()
                         .iter()
                         .filter(|d| format!("{}", d.time_period()).as_str() == test)
                         .cloned()
@@ -416,7 +367,6 @@ impl BeaData {
                 tracing::trace!("Filtering by code {}", test);
                 records.append(
                     &mut self
-                        .records_ref()
                         .iter()
                         .filter(|d| d.code() == test)
                         .cloned()
@@ -427,7 +377,6 @@ impl BeaData {
                 tracing::trace!("Filtering by fips {}", test);
                 records.append(
                     &mut self
-                        .records_ref()
                         .iter()
                         .filter(|d| format!("{}", d.geo_fips()).as_str() == test)
                         .cloned()
@@ -438,7 +387,6 @@ impl BeaData {
                 tracing::trace!("Filtering by location {}", test);
                 records.append(
                     &mut self
-                        .records_ref()
                         .iter()
                         .filter(|d| d.geo_name().to_string().as_str() == test)
                         .cloned()
@@ -449,7 +397,6 @@ impl BeaData {
                 tracing::trace!("Filtering by description {}", test);
                 records.append(
                     &mut self
-                        .records_ref()
                         .iter()
                         .filter(|d| d.description().to_string().as_str() == test)
                         .cloned()
@@ -458,19 +405,18 @@ impl BeaData {
             }
             _ => tracing::warn!("Invalid filter provided."),
         }
-        Self { records }
+        Self(records)
     }
 
     /// Filters records in the struct based by comparing the string representation of values in the field specified in `filter` against the values in the `test` parameter.  The `filter` field can take the values "year", "code", and "fips".
     pub fn filter_many(&self, filter: &str, test: &[String]) -> Self {
-        trace!("Calling filter on {} records.", self.records_ref().len());
+        trace!("Calling filter on {} records.", self.len());
         let mut records = Vec::new();
         match filter {
             "year" => {
                 tracing::trace!("Filtering by years {:?}", test);
                 records.append(
                     &mut self
-                        .records_ref()
                         .iter()
                         .filter(|d| test.contains(&format!("{}", d.time_period())))
                         .cloned()
@@ -481,7 +427,6 @@ impl BeaData {
                 tracing::trace!("Filtering by codes {:?}", test);
                 records.append(
                     &mut self
-                        .records_ref()
                         .iter()
                         .filter(|d| test.contains(&d.code().to_string()))
                         .cloned()
@@ -492,7 +437,6 @@ impl BeaData {
                 tracing::trace!("Filtering by fips {:?}", test);
                 records.append(
                     &mut self
-                        .records_ref()
                         .iter()
                         .filter(|d| test.contains(&format!("{}", d.geo_fips())))
                         .cloned()
@@ -503,7 +447,6 @@ impl BeaData {
                 tracing::trace!("Filtering by locations {:?}", test);
                 records.append(
                     &mut self
-                        .records_ref()
                         .iter()
                         .filter(|d| test.contains(&d.geo_name().to_string()))
                         .cloned()
@@ -514,7 +457,6 @@ impl BeaData {
                 tracing::trace!("Filtering by descriptions {:?}", test);
                 records.append(
                     &mut self
-                        .records_ref()
                         .iter()
                         .filter(|d| test.contains(&d.description().to_string()))
                         .cloned()
@@ -524,7 +466,7 @@ impl BeaData {
             _ => tracing::warn!("Invalid filter provided."),
         }
 
-        Self { records }
+        Self(records)
     }
 
     /// Filters records in the struct based upon string representations of the values for the
@@ -551,11 +493,11 @@ impl TryFrom<BeaDataRaw> for BeaData {
             "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {'Converting BEA data.'}",
         )
         .unwrap();
-        let bar = ProgressBar::new(raw.records_ref().len() as u64);
+        let bar = ProgressBar::new(raw.len() as u64);
         bar.set_style(style);
         let mut res = Vec::new();
         let mut k = 0;
-        for (i, record) in raw.records().into_iter().enumerate() {
+        for (i, record) in raw.iter().cloned().enumerate() {
             trace!("Processing row {}", i);
             let value = str_to_int(&record.data_value)?;
             if let Some(num) = value {
@@ -581,14 +523,14 @@ impl TryFrom<BeaDataRaw> for BeaData {
             bar.inc(1);
         }
         info!("Dropped {} records with NA values.", k);
-        Ok(BeaData { records: res })
+        Ok(BeaData(res))
     }
 }
 
 impl From<Vec<BeaDatum>> for BeaData {
     fn from(records: Vec<BeaDatum>) -> Self {
         tracing::trace!("Calling From for BeaData.");
-        Self { records }
+        Self(records)
     }
 }
 

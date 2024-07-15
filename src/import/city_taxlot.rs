@@ -1,6 +1,7 @@
 //! The `city_taxlot` submodule contains data structures associated with the city version of the
 //! county tax parcel GIS layer.
 use crate::utils;
+use derive_more::{Deref, DerefMut};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use tracing::warn;
@@ -128,39 +129,20 @@ impl CityTaxlot {
 }
 
 /// The `CityTaxlots` struct contains a `records` field that holds a vector of type [`CityTaxlot`].
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct CityTaxlots {
-    records: Vec<CityTaxlot>,
-}
+#[derive(Debug, Clone, Default, Serialize, Deserialize, Deref, DerefMut)]
+pub struct CityTaxlots(Vec<CityTaxlot>);
 
 impl CityTaxlots {
     /// Creates a new `CityTaxlots` struct from a CSV file located at `path`.
     pub fn from_csv<P: AsRef<std::path::Path>>(path: P) -> Result<Self, std::io::Error> {
         let records = utils::from_csv(path)?;
-        Ok(CityTaxlots { records })
-    }
-
-    /// The `records` field contains a vector of type [`CityTaxlot`].  This method returns the
-    /// cloned value of the field.
-    pub fn records(&self) -> Vec<CityTaxlot> {
-        self.records.clone()
-    }
-
-    /// This method returns a reference to the `records` field.
-    pub fn records_ref(&self) -> &Vec<CityTaxlot> {
-        &self.records
-    }
-
-    /// This method returns a mutable reference to the `records` field.
-    pub fn records_mut(&mut self) -> &mut Vec<CityTaxlot> {
-        &mut self.records
+        Ok(CityTaxlots(records))
     }
 
     /// The `addresses()` method returns the `address` field from each element of [`CityTaxlot`]
     /// collected into a vector of type `String`.
     pub fn addresses(&self) -> Vec<String> {
-        self.records_ref()
-            .par_iter()
+        self.par_iter()
             .map(|v| v.address())
             .collect::<Vec<String>>()
     }
@@ -168,8 +150,7 @@ impl CityTaxlots {
     /// The `owner_names()` method returns the `owner_name` field from each element of [`CityTaxlot`]
     /// collected into a vector of type `String`.
     pub fn owner_names(&self) -> Vec<String> {
-        self.records_ref()
-            .par_iter()
+        self.par_iter()
             .map(|v| v.owner_name())
             .collect::<Vec<String>>()
     }
@@ -177,7 +158,6 @@ impl CityTaxlots {
     /// Returns a vector of unique addresses associated with a given property owner `name`.
     pub fn associated_addresses(&self, name: &str) -> Vec<String> {
         let mut res = self
-            .records_ref()
             .par_iter()
             .filter(|v| v.owner_name() == name)
             .map(|v| v.address())
@@ -193,7 +173,6 @@ impl CityTaxlots {
     /// Returns a vector of unique owner names associated with a given address `address`.
     pub fn associated_names(&self, address: &str) -> Vec<String> {
         let mut res = self
-            .records_ref()
             .par_iter()
             .filter(|v| v.address() == address)
             .map(|v| v.owner_name())
