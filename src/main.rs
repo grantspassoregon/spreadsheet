@@ -48,7 +48,7 @@ fn main() -> Clean<()> {
 
     match cli.command.as_str() {
         "read_bea" => {
-            dotenv::dotenv().ok();
+            dotenvy::dotenv().ok();
             let path = std::env::var("BEA_CAINC5N_CSV")?;
             let records = BeaData::from_csv(path)?;
             info!("Records: {}", records.len());
@@ -56,7 +56,7 @@ fn main() -> Clean<()> {
             info!("Hash is {:#?}", hash);
         }
         "load_bea" => {
-            dotenv::dotenv().ok();
+            dotenvy::dotenv().ok();
             let raw = std::env::var("BEA_CAINC5N_RAW")?;
             info!("Reading raw csv file.");
             let records = BeaDataRaw::from_csv(raw)?;

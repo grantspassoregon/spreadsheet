@@ -3,6 +3,8 @@ use address::business::BusinessLicenses;
 use address::prelude::to_csv;
 use aid::prelude::*;
 use spreadsheet::data::*;
+use spreadsheet::import::beehive;
+use spreadsheet::import::utilities::wastewater;
 use spreadsheet::prelude::*;
 use tracing::{info, trace};
 
@@ -142,7 +144,7 @@ fn convert_raw_bea() -> Clean<()> {
         .try_init()
     {};
     trace!("Subscriber initialized.");
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
     let raw = std::env::var("BEA_CAINC5N_RAW")?;
     let csv = std::env::var("BEA_CAINC5N_CSV")?;
     let dat = std::env::var("BEA_CAINC5N_DAT")?;
@@ -162,7 +164,7 @@ fn print_code_keys() -> Clean<()> {
         .try_init()
     {};
     trace!("Subscriber initialized.");
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
     let csv = std::env::var("BEA_CAINC5N_CSV")?;
 
     tracing::info!("Opening csv: {csv}");
@@ -185,7 +187,7 @@ fn print_fips_tree() -> Clean<()> {
         .try_init()
     {};
     trace!("Subscriber initialized.");
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
     let dat = std::env::var("BEA_CAINC5N_DAT")?;
     let records = BeaData::load(dat)?;
     let mut keys = records.iter().map(|r| r.geo_fips).collect::<Vec<i32>>();
@@ -258,5 +260,49 @@ fn business_mailing() -> Clean<()> {
         "c:/users/erose/documents/business_mailing_missing_20240530.csv".into(),
     )?;
 
+    Ok(())
+}
+
+#[test]
+fn load_wastewater_events_raw() -> Result<(), std::io::Error> {
+    if let Ok(()) = tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .try_init()
+    {};
+    trace!("Subscriber initialized.");
+
+    let file_path = "./tests/test_data/wastewater_events_20240729.csv";
+    let records = beehive::EventsRaw::from_csv(file_path)?;
+    info!("Records: {:?}", records.len());
+    let records = beehive::Events::from(records);
+    info!("Records: {:?}", records.len());
+    // assert_eq!(records.len(), 370);
+
+    Ok(())
+}
+
+#[test]
+fn read_wastewater_device() -> aid::prelude::Clean<()> {
+    if let Ok(()) = tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .try_init()
+    {};
+    let device =
+        wastewater::device::Devices::from_shp_z("c:/users/erose/shapefiles/wastewater_device.shp")?;
+    tracing::info!("Devices found: {}", device.len());
+    tracing::info!("Devices found: {:#?}", device[0]);
+    Ok(())
+}
+
+#[test]
+fn read_wastewater_line() -> aid::prelude::Clean<()> {
+    if let Ok(()) = tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .try_init()
+    {};
+    let lines =
+        wastewater::line::Lines::from_shp_z("c:/users/erose/shapefiles/wastewater_line.shp")?;
+    tracing::info!("Lines found: {}", lines.len());
+    tracing::info!("Line inspection: {:#?}", lines[0]);
     Ok(())
 }

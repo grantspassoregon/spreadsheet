@@ -15,22 +15,30 @@ name = "spreadsheet"
 aid = { git = "https://github.com/grantspassoregon/aid.git", default-features = false, features = [
   "bin",
   "csvs",
+  "gis",
+  "time",
 ] }
 address = { git = "https://github.com/grantspassoregon/address.git" }
-clap = { version = "4.5.9", features = ["derive"] }
+bincode = "1.3.3"
+clap = { version = "4.5.11", features = ["derive"] }
 csv = "1.3.0"
-dotenv = "0.15.0"
+derive_more = "0.99.18"
+dotenvy = "0.15.7"
+galileo = { git = "https://github.com/Maximkaaa/galileo" }
+galileo-types = { git = "https://github.com/Maximkaaa/galileo" }
+geo = { version = "0.28.0", features = ["serde"] }
+geo-types = "0.7.13"
 indicatif = { version = "0.17.8", features = ["rayon"] }
+jiff = { version = "0.1.2", features = ["serde"] }
 nom = "7.1.3"
 rayon = "1.10.0"
 serde = { version = "1.0.204", features = ["derive"] }
-thiserror = "1.0.61"
-tracing = "0.1.40"
-tracing-subscriber = "0.3.18"
-bincode = "1.3.3"
+shapefile = "0.6.0"
 strum = { version = "0.26.3", features = ["derive"] }
 strum_macros = "0.26.4"
-derive_more = "0.99.18"
+thiserror = "1.0.63"
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
 
 [dev-dependencies]
 criterion = "0.5.1"

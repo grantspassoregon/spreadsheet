@@ -655,7 +655,7 @@ pub struct MailingListItem {
 }
 
 impl MailingListItem {
-    /// Creates a new `MailingListItem` from an [`import::CityTaxlots`] struct.
+    /// Creates a new `MailingListItem` from an [`crate::import::CityTaxlots`] struct.
     pub fn from_city_parcels(
         name: &str,
         parcels: &CityTaxlots,
@@ -707,7 +707,7 @@ impl MailingListItem {
         }
     }
 
-    /// Creates a new `MailingListItem` from an [`import::CountyTaxlots`] struct.
+    /// Creates a new `MailingListItem` from an [`crate::import::CountyTaxlots`] struct.
     pub fn from_county_parcels(
         name: &str,
         parcels: &CountyTaxlots,
