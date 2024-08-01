@@ -281,6 +281,10 @@ fn load_wastewater_events_raw() -> Result<(), std::io::Error> {
     Ok(())
 }
 
+// Reads wastewater devices from a shapefile.
+// From ArcPro, export the wastewater devices point layer as a shapefile.
+// Set the projection to EPSG-3587
+// This test confirms the shapefile on record loads without issue.
 #[test]
 fn read_wastewater_device() -> aid::prelude::Clean<()> {
     if let Ok(()) = tracing_subscriber::fmt()
@@ -304,5 +308,98 @@ fn read_wastewater_line() -> aid::prelude::Clean<()> {
         wastewater::line::Lines::from_shp_z("c:/users/erose/shapefiles/wastewater_line.shp")?;
     tracing::info!("Lines found: {}", lines.len());
     tracing::info!("Line inspection: {:#?}", lines[0]);
+    Ok(())
+}
+
+#[test]
+fn read_wastewater_junction() -> aid::prelude::Clean<()> {
+    if let Ok(()) = tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .try_init()
+    {};
+    let junctions = wastewater::junction::Junctions::from_shp_z(
+        "c:/users/erose/shapefiles/wastewater_junction.shp",
+    )?;
+    tracing::info!("Junctions found: {}", junctions.len());
+    tracing::info!("Junction inspection: {:#?}", junctions[0]);
+    Ok(())
+}
+
+#[test]
+fn read_wastewater_events() -> aid::prelude::Clean<()> {
+    if let Ok(()) = tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .try_init()
+    {};
+    trace!("Subscriber initialized.");
+
+    let file_path = "./tests/test_data/wastewater_events_20240729.csv";
+    let records = beehive::EventsRaw::from_csv(file_path)?;
+    let records = beehive::Events::from(records);
+    info!("Records: {:?}", records.len());
+    let device =
+        wastewater::device::Devices::from_shp_z("c:/users/erose/shapefiles/wastewater_device.shp")?;
+    tracing::info!("Devices found: {}", device.len());
+    if let Some(device_events) = records.from_devices(&device) {
+        tracing::info!("Device Events found: {}", device_events.len());
+    }
+    let lines =
+        wastewater::line::Lines::from_shp_z("c:/users/erose/shapefiles/wastewater_line.shp")?;
+    tracing::info!("Lines found: {}", lines.len());
+    if let Some(line_events) = records.from_lines(&lines) {
+        tracing::info!("Line Events found: {}", line_events.len());
+    }
+    let junctions = wastewater::junction::Junctions::from_shp_z(
+        "c:/users/erose/shapefiles/wastewater_junction.shp",
+    )?;
+    tracing::info!("Junctions found: {}", junctions.len());
+    if let Some(junction_events) = records.from_junctions(&junctions) {
+        tracing::info!("Junction Events found: {}", junction_events.len());
+    }
+    Ok(())
+}
+
+#[test]
+// Load beehive events from a csv file.
+// Export wastewater devices to .shp from ArcPro.
+// Set projection to EPSG-3587.
+// Convert to Events layers and export to geojson.
+fn write_wastewater_events() -> aid::prelude::Clean<()> {
+    if let Ok(()) = tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .try_init()
+    {};
+    trace!("Subscriber initialized.");
+
+    let file_path = "./tests/test_data/wastewater_events_20240729.csv";
+    let records = beehive::EventsRaw::from_csv(file_path)?;
+    let records = beehive::Events::from(records);
+    info!("Records: {:?}", records.len());
+    let device =
+        wastewater::device::Devices::from_shp_z("c:/users/erose/shapefiles/wastewater_device.shp")?;
+    tracing::info!("Devices found: {}", device.len());
+    if let Some(device_events) = records.from_devices(&device) {
+        tracing::info!("Device Events found: {}", device_events.len());
+        let path = "C:/users/erose/geojson/device_events.geojson";
+        device_events.geojson(path)?;
+    }
+    let lines =
+        wastewater::line::Lines::from_shp_z("c:/users/erose/shapefiles/wastewater_line.shp")?;
+    tracing::info!("Lines found: {}", lines.len());
+    if let Some(line_events) = records.from_lines(&lines) {
+        tracing::info!("Line Events found: {}", line_events.len());
+        let path = "C:/users/erose/geojson/line_events.geojson";
+        line_events.geojson(path)?;
+    }
+    let junctions = wastewater::junction::Junctions::from_shp_z(
+        "c:/users/erose/shapefiles/wastewater_junction.shp",
+    )?;
+    tracing::info!("Junctions found: {}", junctions.len());
+    if let Some(junction_events) = records.from_junctions(&junctions) {
+        tracing::info!("Junction Events found: {}", junction_events.len());
+        let path = "C:/users/erose/geojson/junction_events.geojson";
+        junction_events.geojson(path)?;
+    }
+
     Ok(())
 }

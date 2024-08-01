@@ -53,7 +53,7 @@ impl From<i8> for Entity {
             8 => Self::Parks,
             100 => Self::Unknown,
             _ => {
-                tracing::warn!("Unrecognized owner code: {}", value);
+                tracing::warn!("Unrecognized entity code: {}", value);
                 Self::Unknown
             }
         }

@@ -4,9 +4,9 @@ use crate::import::utilities::entity::Entity;
 use crate::import::utilities::wastewater::owner::Owner;
 use crate::utils;
 use geo::geometry;
-use std::path;
+use std::{fmt, path};
 
-/// The `Device` struct represents a wastewater device from an ESRI Utility Network..
+/// The `Device` struct represents a wastewater device from an ESRI Utility Network.
 /// Domain field values in the UN are coded integers, so we will import the integers and recode
 /// them with enums.
 #[derive(Debug, Clone, PartialEq, serde::Deserialize, serde::Serialize)]
@@ -26,6 +26,33 @@ pub struct Device {
 }
 
 impl Device {
+    /// Returns a reference to the value of the `asset_id` field, the unique identifier for the
+    /// device.
+    pub fn asset_id(&self) -> &String {
+        &self.asset_id
+    }
+
+    /// Returns a reference to the value of the `historic_id` field, the historic identifier for the
+    /// device.
+    pub fn historic_id(&self) -> &Option<String> {
+        &self.historic_id
+    }
+
+    /// Returns a string representation of the `asset_group` field.
+    pub fn asset_group(&self) -> String {
+        self.asset_group.to_string()
+    }
+
+    /// Returns a string representation of the `asset_type` field.
+    pub fn asset_type(&self) -> String {
+        self.asset_type.to_string()
+    }
+
+    /// Returns a string representation of the `owner` field.
+    pub fn owner(&self) -> String {
+        self.owner.to_string()
+    }
+
     /// Creates a new `Device` struct from a shapefile geometry and record.
     pub fn from_shp(
         geometry: geo::geometry::Geometry,
@@ -171,6 +198,34 @@ pub enum AssetGroup {
     Unknown,
 }
 
+impl fmt::Display for AssetGroup {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Anode => write!(f, "Anode"),
+            Self::BackflowPreventer => write!(f, "Backflow Preventer"),
+            Self::Cleanout => write!(f, "Cleanout"),
+            Self::Connection => write!(f, "Connection"),
+            Self::ControllableValve => write!(f, "Controllable Valve"),
+            Self::FlowValve => write!(f, "Flow Valve"),
+            Self::Gate => write!(f, "Gate"),
+            Self::GreaseTrap => write!(f, "Grease Trap"),
+            Self::Groundbed => write!(f, "Groundbed"),
+            Self::ManholeChannel => write!(f, "Manhole Channel"),
+            Self::Meter => write!(f, "Meter"),
+            Self::Monitoring => write!(f, "Monitoring"),
+            Self::Outlet => write!(f, "Outlet"),
+            Self::Pump => write!(f, "Pump"),
+            Self::Rectifier => write!(f, "Rectifier"),
+            Self::ReliefValve => write!(f, "Relief Valve"),
+            Self::ServiceConnection => write!(f, "Service Connection"),
+            Self::TestPoint => write!(f, "Test Point"),
+            Self::Treatment => write!(f, "Treatment"),
+            Self::Weir => write!(f, "Weir"),
+            Self::Unknown => write!(f, "Unknown"),
+        }
+    }
+}
+
 impl From<i8> for AssetGroup {
     fn from(value: i8) -> Self {
         match value {
@@ -196,7 +251,7 @@ impl From<i8> for AssetGroup {
             52 => Self::TestPoint,
             53 => Self::Groundbed,
             _ => {
-                tracing::warn!("Unrecognized owner code: {}", value);
+                tracing::warn!("Unrecognized asset group code: {}", value);
                 Self::Unknown
             }
         }
@@ -427,9 +482,60 @@ impl AssetType {
             941 => Self::Rectifier,
             981 => Self::TestPoint,
             _ => {
-                tracing::warn!("Unrecognized owner code: {}", value);
+                tracing::warn!("Unrecognized asset type code: {}", value);
                 Self::Unknown
             }
+        }
+    }
+}
+
+impl fmt::Display for AssetType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::AirAndVacuum => write!(f, "Air & Vacuum"),
+            Self::AirGap => write!(f, "Air Gap"),
+            Self::AirRelease => write!(f, "Air Release"),
+            Self::Altitude => write!(f, "Altitude"),
+            Self::AnodeBed => write!(f, "Anode Bed"),
+            Self::BackflowPreventer => write!(f, "Backflow Preventer"),
+            Self::BroadCrested => write!(f, "Broad-Crested"),
+            Self::Bulk => write!(f, "Bulk"),
+            Self::Check => write!(f, "Check"),
+            Self::Cleanout => write!(f, "Cleanout"),
+            Self::Combination => write!(f, "Combination"),
+            Self::CombinationAir => write!(f, "Combination Air"),
+            Self::Commercial => write!(f, "Commercial"),
+            Self::DirectionalManholeChannel => write!(f, "Directional Manhole Channel"),
+            Self::EffluentDischarge => write!(f, "Effluent Discharge"),
+            Self::Galvanic => write!(f, "Galvanic"),
+            Self::Gate => write!(f, "Gate"),
+            Self::GreaseInterceptor => write!(f, "Grease Interceptor"),
+            Self::GreaseRecovery => write!(f, "Grease Recovery"),
+            Self::GreaseTrap => write!(f, "Grease Trap"),
+            Self::Iccp => write!(f, "ICCP"),
+            Self::Industrial => write!(f, "Industrial"),
+            Self::Labyrinth => write!(f, "Labyrinth"),
+            Self::LampHole => write!(f, "Lamp Hole"),
+            Self::ManholeChannel => write!(f, "Manhole Channel"),
+            Self::MinimumEnergyLoss => write!(f, "Minimum Energy Loss"),
+            Self::Overflow => write!(f, "Overflow"),
+            Self::PipeConnection => write!(f, "Pipe Connection"),
+            Self::PressureSensor => write!(f, "Pressure Sensor"),
+            Self::Pump => write!(f, "Pump"),
+            Self::PumpWithGrinder => write!(f, "Pump with Grinder"),
+            Self::Rectifier => write!(f, "Rectifier"),
+            Self::Residential => write!(f, "Residential"),
+            Self::SharpCrested => write!(f, "Sharp-Crested"),
+            Self::Station => write!(f, "Station"),
+            Self::StopLog => write!(f, "Stop Log"),
+            Self::System => write!(f, "System"),
+            Self::TemperatureSensor => write!(f, "Temperature Sensor"),
+            Self::Terminal => write!(f, "Terminal"),
+            Self::TestPoint => write!(f, "Test Point"),
+            Self::TreatmentPlant => write!(f, "Treatment Plant"),
+            Self::Vault => write!(f, "Vault"),
+            Self::VNotch => write!(f, "V-Notch"),
+            Self::Unknown => write!(f, "Unknown"),
         }
     }
 }

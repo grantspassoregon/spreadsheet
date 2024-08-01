@@ -2,6 +2,7 @@
 //! management system.
 //! The purpose of this module is to import the record of Beehive Events into a spatial layer for
 //! querying and analysis.
+use crate::import::utilities::wastewater;
 use crate::utils;
 use jiff::civil;
 use std::str::FromStr;
@@ -96,6 +97,158 @@ pub struct Event {
     status: Option<Status>,
 }
 
+impl Event {
+    /// Returns a reference to the value of the `asset_id` field, the unique identifier for the
+    /// event.
+    pub fn asset_id(&self) -> &String {
+        &self.asset_id
+    }
+
+    /// Returns a string representation of the `asset_kind` field.
+    pub fn asset_kind(&self) -> String {
+        self.asset_kind.to_string()
+    }
+
+    /// Returns a reference to the `assigned_to` field.
+    pub fn assigned_to(&self) -> &String {
+        &self.assigned_to
+    }
+
+    /// Returns a reference to the `created_by` field.
+    pub fn created_by(&self) -> &String {
+        &self.created_by
+    }
+
+    /// Returns a string representation of the `create_date` field.
+    pub fn create_date(&self) -> String {
+        self.create_date.to_string()
+    }
+
+    /// Returns a string representation of the `maintenance` field.
+    pub fn maintenance(&self) -> Option<String> {
+        self.maintenance.clone().map(|v| v.to_string())
+    }
+
+    /// Returns a reference to the `modified_by` field.
+    pub fn modified_by(&self) -> &String {
+        &self.modified_by
+    }
+
+    /// Returns a string representation of the `modify_date` field.
+    pub fn modify_date(&self) -> String {
+        self.modify_date.to_string()
+    }
+
+    /// Returns a reference to the `name` field.
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+
+    /// Returns a reference to the `notes` field.
+    pub fn notes(&self) -> &Option<String> {
+        &self.notes
+    }
+
+    /// Returns a string representation of the `kind` field.
+    pub fn kind(&self) -> String {
+        self.kind.to_string()
+    }
+
+    /// Returns a string representation of the `plan_date` field.
+    pub fn plan_date(&self) -> String {
+        self.plan_date.to_string()
+    }
+
+    /// Returns a string representation of the `priority` field.
+    pub fn priority(&self) -> String {
+        self.priority.to_string()
+    }
+
+    /// Returns a string representation of the `schedule_time` field.
+    pub fn schedule_time(&self) -> String {
+        self.schedule_time.to_string()
+    }
+
+    /// Returns a string representation of the `status` field.
+    pub fn status(&self) -> Option<String> {
+        self.status.clone().map(|v| v.to_string())
+    }
+
+    /// The `from_device` method creates a new [`wastewater::event::DeviceEvent`].
+    /// Searches through `devices` for a matching asset ID.  If found, creates a new
+    /// [`wastewater::event::DeviceEvent`], otherwise returns None.
+    pub fn from_device(
+        &self,
+        devices: &wastewater::device::Devices,
+    ) -> Option<wastewater::event::DeviceEvent> {
+        let device = devices
+            .iter()
+            .filter(|v| {
+                v.asset_id() == &self.asset_id || v.historic_id() == &Some(self.asset_id.clone())
+            })
+            .cloned()
+            .collect::<Vec<wastewater::device::Device>>();
+        if !device.is_empty() {
+            Some(wastewater::event::DeviceEvent::new(
+                device[0].clone(),
+                self.clone(),
+            ))
+        } else {
+            None
+        }
+    }
+
+    /// The `from_line` method creates a new [`wastewater::event::LineEvent`].
+    /// Searches through `lines` for a matching asset ID.  If found, creates a new
+    /// [`wastewater::event::LineEvent`], otherwise returns None.
+    /// TODO: The filter operation is slow.  Try returning -> (matched, unmatched)
+    /// and chaining the comparisons with asset and historic id so the task can be parallelized.
+    pub fn from_line(
+        &self,
+        lines: &wastewater::line::Lines,
+    ) -> Option<wastewater::event::LineEvent> {
+        let line = lines
+            .iter()
+            .filter(|v| {
+                v.asset_id() == &self.asset_id || v.historic_id() == &Some(self.asset_id.clone())
+            })
+            .cloned()
+            .collect::<Vec<wastewater::line::Line>>();
+        if !line.is_empty() {
+            Some(wastewater::event::LineEvent::new(
+                line[0].clone(),
+                self.clone(),
+            ))
+        } else {
+            None
+        }
+    }
+
+    /// The `from_junction` method creates a new [`wastewater::event::JunctionEvent`].
+    /// Searches through `junctions` for a matching asset ID.  If found, creates a new
+    /// [`wastewater::event::JunctionEvent`], otherwise returns None.
+    pub fn from_junction(
+        &self,
+        junctions: &wastewater::junction::Junctions,
+    ) -> Option<wastewater::event::JunctionEvent> {
+        let junction = junctions
+            .iter()
+            .filter(|v| {
+                v.asset_id() == &self.asset_id || v.historic_id() == &Some(self.asset_id.clone())
+            })
+            .cloned()
+            .collect::<Vec<wastewater::junction::Junction>>();
+        if !junction.is_empty() {
+            Some(wastewater::event::JunctionEvent::new(
+                junction[0].clone(),
+                self.clone(),
+            ))
+        } else {
+            None
+        }
+    }
+}
+
 impl TryFrom<EventRaw> for Event {
     type Error = aid::prelude::Bandage;
 
@@ -162,6 +315,89 @@ impl TryFrom<&EventRaw> for Event {
 )]
 pub struct Events(Vec<Event>);
 
+impl Events {
+    /// The `from_devices` method creates a new [`wastewater::event::DeviceEvents`] by matching the
+    /// Beehive Event `asset_id` to the `asset_id` field in [`wastewater::device::Device`].
+    pub fn from_devices(
+        &self,
+        devices: &wastewater::device::Devices,
+    ) -> Option<wastewater::event::DeviceEvents> {
+        let mut results = Vec::new();
+        let mut dropped = 0;
+        self.iter()
+            .map(|v| match v.from_device(devices) {
+                Some(event) => results.push(event),
+                None => {
+                    tracing::trace!("Could not locate asset id for event: {}", v.asset_id);
+                    dropped += 1;
+                }
+            })
+            .for_each(drop);
+        if !results.is_empty() {
+            if dropped > 0 {
+                tracing::trace!("Dropped events: {}", dropped);
+            }
+            Some(wastewater::event::DeviceEvents::new(results))
+        } else {
+            None
+        }
+    }
+
+    /// The `from_lines` method creates a new [`wastewater::event::LineEvents`] by matching the
+    /// Beehive Event `asset_id` to the `asset_id` field in [`wastewater::line::Line`].
+    pub fn from_lines(
+        &self,
+        lines: &wastewater::line::Lines,
+    ) -> Option<wastewater::event::LineEvents> {
+        let mut results = Vec::new();
+        let mut dropped = 0;
+        self.iter()
+            .map(|v| match v.from_line(lines) {
+                Some(event) => results.push(event),
+                None => {
+                    tracing::trace!("Could not locate asset id for event: {}", v.asset_id);
+                    dropped += 1;
+                }
+            })
+            .for_each(drop);
+        if !results.is_empty() {
+            if dropped > 0 {
+                tracing::trace!("Dropped events: {}", dropped);
+            }
+            Some(wastewater::event::LineEvents::new(results))
+        } else {
+            None
+        }
+    }
+
+    /// The `from_junctions` method creates a new [`wastewater::event::JunctionEvents`] by matching the
+    /// Beehive Event `asset_id` to the `asset_id` field in [`wastewater::junction::Junction`].
+    pub fn from_junctions(
+        &self,
+        junctions: &wastewater::junction::Junctions,
+    ) -> Option<wastewater::event::JunctionEvents> {
+        let mut results = Vec::new();
+        let mut dropped = 0;
+        self.iter()
+            .map(|v| match v.from_junction(junctions) {
+                Some(event) => results.push(event),
+                None => {
+                    tracing::trace!("Could not locate asset id for event: {}", v.asset_id);
+                    dropped += 1;
+                }
+            })
+            .for_each(drop);
+        if !results.is_empty() {
+            if dropped > 0 {
+                tracing::trace!("Dropped events: {}", dropped);
+            }
+            Some(wastewater::event::JunctionEvents::new(results))
+        } else {
+            None
+        }
+    }
+}
+
 impl From<EventsRaw> for Events {
     fn from(value: EventsRaw) -> Self {
         let mut events = Vec::new();
@@ -201,6 +437,7 @@ impl From<&EventsRaw> for Events {
     PartialOrd,
     Ord,
     Hash,
+    derive_more::Display,
     serde::Serialize,
     serde::Deserialize,
     strum_macros::EnumIter,
@@ -369,6 +606,7 @@ impl std::str::FromStr for EventKind {
     PartialOrd,
     Ord,
     Hash,
+    derive_more::Display,
     serde::Serialize,
     serde::Deserialize,
     strum_macros::EnumIter,
@@ -435,6 +673,7 @@ impl std::str::FromStr for AssetKind {
     PartialOrd,
     Ord,
     Hash,
+    derive_more::Display,
     serde::Serialize,
     serde::Deserialize,
     strum_macros::EnumIter,
@@ -533,6 +772,7 @@ impl Maintenance {
     PartialOrd,
     Ord,
     Hash,
+    derive_more::Display,
     serde::Serialize,
     serde::Deserialize,
     strum_macros::EnumIter,
@@ -577,6 +817,7 @@ impl std::str::FromStr for Priority {
     PartialOrd,
     Ord,
     Hash,
+    derive_more::Display,
     serde::Serialize,
     serde::Deserialize,
     strum_macros::EnumIter,

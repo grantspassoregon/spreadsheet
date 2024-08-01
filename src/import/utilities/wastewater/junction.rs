@@ -1,4 +1,4 @@
-//! The `line` module records data structures and methods related to wastewater lines in the
+//! The `junction` module records data structures and methods related to wastewater junctions in the
 //! ESRI Utility Network.
 use crate::import::utilities::entity::Entity;
 use crate::import::utilities::wastewater::owner::Owner;
@@ -6,11 +6,11 @@ use crate::utils;
 use geo::geometry;
 use std::path;
 
-/// The `Line` struct represents a wastewater line from an ESRI Utility Network.
+/// The `Junction` struct represents a wastewater junction from an ESRI Utility Network.
 /// Domain field values in the UN are coded integers, so we will import the integers and recode
 /// them with enums.
 #[derive(Debug, Clone, PartialEq, serde::Deserialize, serde::Serialize)]
-pub struct Line {
+pub struct Junction {
     /// The asset group from the ESRI Utility Network.
     pub asset_group: AssetGroup,
     /// The asset type from the ESRI Utility Network.
@@ -21,19 +21,19 @@ pub struct Line {
     pub historic_id: Option<String>,
     /// The asset owner.
     pub owner: Owner,
-    /// The `geometry` field provides the `geo` representation of the line geometry.
+    /// The `geometry` field provides the `geo` representation of the polygon geometry.
     pub geometry: geometry::Geometry,
 }
 
-impl Line {
+impl Junction {
     /// Returns a reference to the value of the `asset_id` field, the unique identifier for the
-    /// line.
+    /// junction.
     pub fn asset_id(&self) -> &String {
         &self.asset_id
     }
 
     /// Returns a reference to the value of the `historic_id` field, the historic identifier for the
-    /// line.
+    /// junction.
     pub fn historic_id(&self) -> &Option<String> {
         &self.historic_id
     }
@@ -53,7 +53,7 @@ impl Line {
         self.owner.to_string()
     }
 
-    /// Creates a new `Line` struct from a shapefile geometry and record.
+    /// Creates a new `Junction` struct from a shapefile geometry and record.
     pub fn from_shp(
         geometry: geo::geometry::Geometry,
         record: &shapefile::dbase::Record,
@@ -105,7 +105,7 @@ impl Line {
     }
 }
 
-/// The `Devices` struct is a wrapper around a vector of type [`Device`].
+/// The `Junctions` struct is a wrapper around a vector of type [`Junction`].
 #[derive(
     Debug,
     Clone,
@@ -115,28 +115,28 @@ impl Line {
     derive_more::Deref,
     derive_more::DerefMut,
 )]
-pub struct Lines(Vec<Line>);
+pub struct Junctions(Vec<Junction>);
 
-impl Lines {
-    /// The `from_shp` method converts from shapefiles of type [`shapefile::Polygon'].
+impl Junctions {
+    /// The `from_shp_z` method converts from shapefiles of type [`shapefile::PointZ'].
     pub fn from_shp_z<P: AsRef<path::Path>>(path: P) -> aid::prelude::Clean<Self> {
         // the read_as method allows us to specify the spatial type, in this case PointZ
         // we also include the record field so we an read the field values.
-        let shp = shapefile::read_as::<_, shapefile::PolylineZ, shapefile::dbase::Record>(path)?;
-        // Iterate through the resulting vector, passing the shape to read_geo and then using
-        // DeviceRaw::from_shp to read the associated record.
-        let lines = shp
+        let shp = shapefile::read_as::<_, shapefile::PointZ, shapefile::dbase::Record>(path)?;
+        // Iterate through the resulting vector, passing the shape to read_geo_point and then using
+        // Junction::from_shp to read the associated record.
+        let junctions = shp
             .iter()
             .map(|(p, r)| {
-                let geo = utils::read_geo_line(p);
-                Line::from_shp(geo, r).unwrap()
+                let geo = utils::read_geo_point(p);
+                Junction::from_shp(geo, r).unwrap()
             })
-            .collect::<Vec<Line>>();
-        Ok(Self(lines))
+            .collect::<Vec<Junction>>();
+        Ok(Self(junctions))
     }
 }
 
-/// The `AssetGroup` enum lists the valid asset groups for wastewater lines.
+/// The `AssetGroup` enum lists the valid asset groups for wastewater junctions.
 #[derive(
     Debug,
     Default,
@@ -152,24 +152,15 @@ impl Lines {
     strum_macros::EnumIter,
 )]
 pub enum AssetGroup {
-    /// The Bonding Line asset group in the SewerLine feature class represents cathodic protection
-    /// with a line feature connecting protected and non-protected features.
-    BondingLine,
-    /// The Sewer Force Main asset group in the SewerLine feature class represents pipes with a
-    /// primary role lifting wastewater to a higher elevation.
-    ForceMain,
-    /// The Sewer Gravity Main asset group in the SewerLine feature class represents pipes using
-    /// gravity to collect and transport wastewater.
-    GravityMain,
-    /// The Lateral asset group in the SewerLine feature class represents service lines with a
-    /// primary role of transporting wastewater from the customer to the main.
-    Lateral,
-    /// The Rectifier Cable asset group in the SewerLine Feature class represents cathodic
-    /// protection wire that connects the rectifier to the pipe.
-    RectifierCable,
-    /// The Test Lead Wire asset group in the SewerLine Feature class represents cathodic
-    /// protection connecting from the test point to protected pipes.
-    TestLeadWire,
+    /// The Sewer Fitting asset group in the SewerJunction feature class represents the junctions
+    /// where pipes connect to other pipes.
+    Fitting,
+    /// The Wire Junction asset group in the SewerJunction feature class represents cathodic
+    /// protection junction features that connect to pipes.
+    Wire,
+    /// The Insulation Junction asset group in the SewerJunction feature class represents cathodic
+    /// protection junction features where the electric current stops.
+    Insulation,
     /// Unknown
     #[default]
     Unknown,
@@ -179,12 +170,9 @@ impl From<i8> for AssetGroup {
     fn from(value: i8) -> Self {
         match value {
             0 => Self::Unknown,
-            1 => Self::GravityMain,
-            2 => Self::ForceMain,
-            3 => Self::Lateral,
-            50 => Self::BondingLine,
-            51 => Self::TestLeadWire,
-            52 => Self::RectifierCable,
+            20 => Self::Fitting,
+            50 => Self::Wire,
+            51 => Self::Insulation,
             _ => {
                 tracing::warn!("Unrecognized asset group code: {}", value);
                 Self::Unknown
@@ -193,7 +181,7 @@ impl From<i8> for AssetGroup {
     }
 }
 
-/// The `AssetGroup` enum lists the valid asset groups for wastewater lines.
+/// The `AssetGroup` enum lists the valid asset groups for wastewater junctions.
 #[derive(
     Debug,
     Default,
@@ -209,59 +197,67 @@ impl From<i8> for AssetGroup {
     strum_macros::EnumIter,
 )]
 pub enum AssetType {
-    /// Aqua test lead wire.
-    /// A sub-type of [`AssetGroup::TestLeadWire`].
-    Aqua,
-    /// Blue test lead wire.
-    /// A sub-type of [`AssetGroup::TestLeadWire`].
-    Blue,
-    /// Sewer Gravity Main to collect wastewater.
-    /// A sub-type of [`AssetGroup::GravityMain`].
-    Collector,
-    /// A Commercial lateral service.
-    /// A sub-type of [`AssetGroup::Lateral`].
-    Commercial,
-    /// Sewer Force main to collect wastewater.
-    /// A sub-type of [`AssetGroup::ForceMain`].
-    ForceMain,
-    /// Forest test lead wire.
-    /// A sub-type of [`AssetGroup::TestLeadWire`].
-    Forest,
-    /// Green test lead wire.
-    /// A sub-type of [`AssetGroup::TestLeadWire`].
-    Green,
-    /// An Industrial lateral service.
-    Industrial,
-    /// Sewer Gravity Main to transport wastewater to the treatment plant.
-    /// A sub-type of [`AssetGroup::GravityMain`].
-    Interceptor,
-    /// Lavender test lead wire.
-    /// A sub-type of [`AssetGroup::TestLeadWire`].
-    Lavender,
-    /// Orange test lead wire.
-    /// A sub-type of [`AssetGroup::TestLeadWire`].
-    Orange,
-    /// Pink test lead wire.
-    /// A sub-type of [`AssetGroup::TestLeadWire`].
-    Pink,
-    /// Rectifier cable used for connecting rectifier to pipe for cathodic protection.
-    /// A sub-type of [`AssetGroup::RectifierCable`].
-    RectifierCable,
-    /// Red test lead wire.
-    /// A sub-type of [`AssetGroup::TestLeadWire`].
-    Red,
-    /// A residential lateral service.
-    /// A sub-type of [`AssetGroup::Lateral`].
-    Residential,
-    /// Strap bonding line.
-    /// A sub-type of [`AssetGroup::BondingLine`].
-    Strap,
-    /// Wire bonding line.
-    /// A sub-type of [`AssetGroup::BondingLine`].
-    Wire,
-    /// Yellow test lead wire.
-    /// A sub-type of [`AssetGroup::TestLeadWire`].
-    Yellow,
+    /// Fitting with a socket at both ends connecting 2 pipes of the same size that is joined,
+    /// welded, brazed or soldered.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    Coupling,
+    /// Fitting connecting 4 pipes of the same size.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    Cross,
+    /// Fitting connecting 2 pipes to allow a change in direction.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    Elbow,
+    /// Fitting to cover an open end of a pipe.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    EndCap,
+    /// Fitting connecting 2 pipes designed to absorb thermal expansion or movement.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    ExpansionJoint,
+    /// Fitting connecting pipes or valves with threaded bolts, wedges, clamps or other means of
+    /// high compressive force.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    Flange,
+    /// Fitting inserted inside a pipe segment to stop flow.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    Plug,
+    /// Fitting connecting 2 pipes of different sizes.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    Reducer,
+    /// Fitting connecting 4 pipes of different sizes.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    ReducingCross,
+    /// Fitting connecting 3 pipes of different sizes.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    ReducingTee,
+    /// Fitting connecting 2 pipes by placing 2 different sides of the fitting around the pipes and
+    /// securing in place with bolts.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    Saddle,
+    /// Fitting connection 2 pipes by screwing the pipes together.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    Screw,
+    /// Fitting connecting 2 pipes that by placing a sleeve over the pipe ends secured with clamps.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    Sleeve,
+    /// Fitting placed around a pipe and secured in place with bolts to enable a tap to be inserted in the pipe.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    Tap,
+    /// Fitting connection 2 different size pipes that is mounted around both sides of the larger
+    /// pipe.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    TappingSaddle,
+    /// Fitting connection 3 pipes of the same size.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    Tee,
+    /// Fitting that transitions a pipe to another pipe of a different material.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    Transition,
+    /// Fitting that welds 2 pipes together.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    Weld,
+    /// Fitting connecting 3 pipes where a side inlet pipe joins at less than 90 degrees.
+    /// A sub-type of [`AssetGroup::Fitting`].
+    Wye,
     /// Unknown
     #[default]
     Unknown,
@@ -271,24 +267,25 @@ impl From<i16> for AssetType {
     fn from(value: i16) -> Self {
         match value {
             0 => Self::Unknown,
-            1 => Self::Collector,
-            2 => Self::Interceptor,
-            41 => Self::ForceMain,
-            121 => Self::Commercial,
-            122 => Self::Industrial,
-            123 => Self::Residential,
-            901 => Self::Aqua,
-            902 => Self::Blue,
-            903 => Self::Forest,
-            904 => Self::Green,
-            905 => Self::Lavender,
-            906 => Self::Orange,
-            907 => Self::Pink,
-            908 => Self::Red,
-            909 => Self::Yellow,
-            941 => Self::Wire,
-            942 => Self::Strap,
-            961 => Self::RectifierCable,
+            41 => Self::Coupling,
+            42 => Self::Cross,
+            43 => Self::Elbow,
+            44 => Self::EndCap,
+            45 => Self::ExpansionJoint,
+            46 => Self::Flange,
+            47 => Self::Plug,
+            48 => Self::Reducer,
+            49 => Self::ReducingCross,
+            50 => Self::ReducingTee,
+            51 => Self::Saddle,
+            52 => Self::Screw,
+            53 => Self::Sleeve,
+            54 => Self::Tap,
+            55 => Self::TappingSaddle,
+            56 => Self::Tee,
+            57 => Self::Transition,
+            58 => Self::Weld,
+            59 => Self::Wye,
             _ => {
                 tracing::warn!("Unrecognized asset type code: {}", value);
                 Self::Unknown

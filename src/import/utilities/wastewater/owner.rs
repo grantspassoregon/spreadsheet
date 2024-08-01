@@ -14,6 +14,7 @@ use crate::import::utilities::entity::Entity;
     serde::Serialize,
     serde::Deserialize,
     strum_macros::EnumIter,
+    derive_more::Display,
 )]
 pub enum Owner {
     /// City of Grants Pass.

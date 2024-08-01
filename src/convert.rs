@@ -102,6 +102,37 @@ impl Convert<geo_types::MultiPolygon> {
     }
 }
 
+impl Convert<geo_types::Geometry> {
+    /// The `geojson_value` method converts a [`geo_types::Geometry`] into a [`geojson::Value`].
+    pub fn geojson_value(self) -> geojson::Value {
+        match self.clone().into_inner() {
+            geo_types::Geometry::Point(x) => geojson::Value::from(&x),
+            geo_types::Geometry::Line(x) => geojson::Value::from(&x),
+            geo_types::Geometry::LineString(x) => geojson::Value::from(&x),
+            geo_types::Geometry::Polygon(x) => geojson::Value::from(&x),
+            geo_types::Geometry::MultiPoint(x) => geojson::Value::from(&x),
+            geo_types::Geometry::MultiLineString(x) => geojson::Value::from(&x),
+            geo_types::Geometry::MultiPolygon(x) => geojson::Value::from(&x),
+            geo_types::Geometry::GeometryCollection(x) => geojson::Value::from(&x),
+            geo_types::Geometry::Rect(x) => geojson::Value::from(&x),
+            geo_types::Geometry::Triangle(x) => geojson::Value::from(&x),
+        }
+    }
+
+    /// The `geojson_geometry` method converts a [`geo_types::Geometry`] to a
+    /// [`geojson::Geometry`].
+    pub fn geojson_geometry(self) -> geojson::Geometry {
+        let conv = Convert::new(self.geojson_value());
+        geojson::Geometry::new(conv.into_inner())
+    }
+
+    /// The `geojson_feature` method converts a [`geo_types::Geometry`] to a [`geojson::Feature`].
+    pub fn geojson_feature(self) -> geojson::Feature {
+        let conv = Convert::new(self.geojson_geometry()).into_inner();
+        geojson::Feature::from(conv)
+    }
+}
+
 impl Convert<geo::geometry::MultiPolygon> {
     /// The `geo_to_multipolygon` method converts from a [`geo::geometry::MultiPolygon`] to a
     /// [`galileo::galileo_types::impls::MultiPolygon<Point2d>`].
