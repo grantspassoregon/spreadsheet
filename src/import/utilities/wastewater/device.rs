@@ -21,6 +21,8 @@ pub struct Device {
     pub historic_id: Option<String>,
     /// The asset owner.
     pub owner: Owner,
+    /// Link to a scan of the manhole card.
+    pub manhole_card: Option<String>,
     /// The `geometry` field provides the `geo` representation of the polygon geometry.
     pub geometry: geometry::Geometry,
 }
@@ -53,6 +55,11 @@ impl Device {
         self.owner.to_string()
     }
 
+    /// Returns a reference to the value of the `manhole_card` field.
+    pub fn manhole_card(&self) -> &Option<String> {
+        &self.manhole_card
+    }
+
     /// Creates a new `Device` struct from a shapefile geometry and record.
     pub fn from_shp(
         geometry: geo::geometry::Geometry,
@@ -77,6 +84,8 @@ impl Device {
                             asset_id,
                             historic_id,
                             owner: Owner::from(&Entity::from(owner as i8)),
+                            // Populate manhole card field after creation
+                            manhole_card: None,
                             geometry,
                         })
                     } else {
@@ -120,6 +129,7 @@ pub struct Devices(Vec<Device>);
 
 impl Devices {
     /// The `from_shp` method converts from shapefiles of type [`shapefile::Polygon'].
+    #[tracing::instrument(skip(path))]
     pub fn from_shp_z<P: AsRef<path::Path>>(path: P) -> aid::prelude::Clean<Self> {
         // the read_as method allows us to specify the spatial type, in this case PointZ
         // we also include the record field so we an read the field values.

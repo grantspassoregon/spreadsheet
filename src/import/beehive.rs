@@ -2,9 +2,13 @@
 //! management system.
 //! The purpose of this module is to import the record of Beehive Events into a spatial layer for
 //! querying and analysis.
+use crate::import::utilities::cctv::{Inspection, Inspections};
 use crate::import::utilities::wastewater;
+use crate::import::utilities::wastewater::manhole_card::ManholeCards;
 use crate::utils;
 use jiff::civil;
+use rayon::prelude::*;
+use std::path;
 use std::str::FromStr;
 
 /// The `EventRaw` struct contains fields for a Beehive event.  Although we could serialize
@@ -43,7 +47,6 @@ pub struct EventRaw {
     priority: String,
     #[serde(rename = "Schedule Time")]
     schedule_time: String,
-    // "Complete" = true; null = false;
     #[serde(rename = "Event Status")]
     status: Option<String>,
 }
@@ -76,104 +79,72 @@ impl EventsRaw {
 
 /// The `Event` struct is a Beehive Event that has been converted into domain-specific data structures.
 #[derive(
-    Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize,
+    Debug,
+    Clone,
+    PartialEq,
+    derive_getters::Getters,
+    derive_setters::Setters,
+    serde::Serialize,
+    serde::Deserialize,
 )]
+#[setters(prefix = "with_", into)]
 pub struct Event {
     // Upgrade to strongly typed ID
+    /// The `asset_id` field represents the unique identifier for the `Event`.
+    #[setters(doc = "Sets the value of the `asset_id` field.")]
     asset_id: String,
+    /// The `asset_kind` field is the asset type of the utility asset from the ESRI Utility
+    /// Network.
+    #[setters(doc = "Sets the value of the `asset_kind` field.")]
     asset_kind: AssetKind,
+    /// The `assigned_to` field records the worker assigned to the `Event`.
+    #[setters(doc = "Sets the value of the `assigned_to` field.")]
     assigned_to: String,
+    /// The `cctv` field holds a CCTV Report of type [`Inspection`] associated with the `Event`.
+    #[setters(strip_option, doc = "Sets the value of the `cctv` field.")]
+    cctv: Option<Inspection>,
+    /// The `created_by` field denotes the creator of the `Event` record.
+    #[setters(doc = "Sets the value of the `created_by` field.")]
     created_by: String,
+    /// The `create_date` field represents the date and time of `Event` creation.
+    #[setters(doc = "Sets the value of the `create_date` field.")]
     create_date: civil::DateTime,
+    /// The `maintenance` field represents the type of maintenance associated with the `Event`.
+    #[setters(strip_option, doc = "Sets the value of the `maintenance` field.")]
     maintenance: Option<Maintenance>,
+    /// The `manhole_card` field holds the Manhole Card associated with the asset.
+    #[setters(strip_option, doc = "Sets the value of the `manhole_card` field.")]
+    manhole_card: Option<path::PathBuf>,
+    /// The `modify_date` field represents the last date and time the `Event` was modified.
+    #[setters(doc = "Sets the value of the `modify_date` field.")]
     modify_date: civil::DateTime,
+    /// The `modified_by` field represents the last person to modify the `Event`.
+    #[setters(doc = "Sets the value of the `modified_by` field.")]
     modified_by: String,
+    /// The `name` field corresponds to the Feature Name field in the Beehive database.
+    #[setters(doc = "Sets the value of the `name` field.")]
     name: String,
+    /// The `notes` field corresponds to the Notes field in the Beehive database.
+    #[setters(doc = "Sets the value of the `notes` field.")]
     notes: Option<String>,
+    /// The `kind` field corresponds to the Event Type field in the Beehive Database.
+    #[setters(doc = "Sets the value of the `kind` field.")]
     kind: EventKind,
+    /// The `plan_date` field corresponds to the Planned Date field in the Beehive Database.
+    #[setters(doc = "Sets the value of the `plan_date` field.")]
     plan_date: civil::Date,
+    /// The `priority` field corresponds to the Priority field in the Beehive Database.
+    #[setters(doc = "Sets the value of the `priority` field.")]
     priority: Priority,
+    /// The `schedule_time` field corresponds to the Schedule Time field in the Beehive Database.
+    #[setters(doc = "Sets the value of the `schedule_time` field.")]
     schedule_time: civil::Time,
+    /// The `status` field corresponds to the Status field in the Beehive Database.
+    #[setters(strip_option, doc = "Sets the value of the `status` field.")]
     status: Option<Status>,
 }
 
 impl Event {
-    /// Returns a reference to the value of the `asset_id` field, the unique identifier for the
-    /// event.
-    pub fn asset_id(&self) -> &String {
-        &self.asset_id
-    }
-
-    /// Returns a string representation of the `asset_kind` field.
-    pub fn asset_kind(&self) -> String {
-        self.asset_kind.to_string()
-    }
-
-    /// Returns a reference to the `assigned_to` field.
-    pub fn assigned_to(&self) -> &String {
-        &self.assigned_to
-    }
-
-    /// Returns a reference to the `created_by` field.
-    pub fn created_by(&self) -> &String {
-        &self.created_by
-    }
-
-    /// Returns a string representation of the `create_date` field.
-    pub fn create_date(&self) -> String {
-        self.create_date.to_string()
-    }
-
-    /// Returns a string representation of the `maintenance` field.
-    pub fn maintenance(&self) -> Option<String> {
-        self.maintenance.clone().map(|v| v.to_string())
-    }
-
-    /// Returns a reference to the `modified_by` field.
-    pub fn modified_by(&self) -> &String {
-        &self.modified_by
-    }
-
-    /// Returns a string representation of the `modify_date` field.
-    pub fn modify_date(&self) -> String {
-        self.modify_date.to_string()
-    }
-
-    /// Returns a reference to the `name` field.
-    pub fn name(&self) -> &String {
-        &self.name
-    }
-
-    /// Returns a reference to the `notes` field.
-    pub fn notes(&self) -> &Option<String> {
-        &self.notes
-    }
-
-    /// Returns a string representation of the `kind` field.
-    pub fn kind(&self) -> String {
-        self.kind.to_string()
-    }
-
-    /// Returns a string representation of the `plan_date` field.
-    pub fn plan_date(&self) -> String {
-        self.plan_date.to_string()
-    }
-
-    /// Returns a string representation of the `priority` field.
-    pub fn priority(&self) -> String {
-        self.priority.to_string()
-    }
-
-    /// Returns a string representation of the `schedule_time` field.
-    pub fn schedule_time(&self) -> String {
-        self.schedule_time.to_string()
-    }
-
-    /// Returns a string representation of the `status` field.
-    pub fn status(&self) -> Option<String> {
-        self.status.clone().map(|v| v.to_string())
-    }
-
     /// The `from_device` method creates a new [`wastewater::event::DeviceEvent`].
     /// Searches through `devices` for a matching asset ID.  If found, creates a new
     /// [`wastewater::event::DeviceEvent`], otherwise returns None.
@@ -182,7 +153,7 @@ impl Event {
         devices: &wastewater::device::Devices,
     ) -> Option<wastewater::event::DeviceEvent> {
         let device = devices
-            .iter()
+            .par_iter()
             .filter(|v| {
                 v.asset_id() == &self.asset_id || v.historic_id() == &Some(self.asset_id.clone())
             })
@@ -208,7 +179,7 @@ impl Event {
         lines: &wastewater::line::Lines,
     ) -> Option<wastewater::event::LineEvent> {
         let line = lines
-            .iter()
+            .par_iter()
             .filter(|v| {
                 v.asset_id() == &self.asset_id || v.historic_id() == &Some(self.asset_id.clone())
             })
@@ -232,7 +203,7 @@ impl Event {
         junctions: &wastewater::junction::Junctions,
     ) -> Option<wastewater::event::JunctionEvent> {
         let junction = junctions
-            .iter()
+            .par_iter()
             .filter(|v| {
                 v.asset_id() == &self.asset_id || v.historic_id() == &Some(self.asset_id.clone())
             })
@@ -245,6 +216,70 @@ impl Event {
             ))
         } else {
             None
+        }
+    }
+
+    /// Fix the cctv report builder:
+    /// If only one is found, add the record.
+    /// If more than one is found, create a cloned event for each report.
+    /// If none are found, pass along the record with no change, so it does not get dropped.
+    /// The current method is dropping records with no matches.
+
+    /// The `add_cctv_builder` method attaches cctv reports of type [`Inspection`] to the `Event`.
+    /// More than one [`Inspection`] may match with a single `Event`.  This method creates a clone
+    /// of the [`Event`] for each additional cctv report, so that all cctv reports end up attached
+    /// to an event.
+    pub fn add_cctv_builder(&self, reports: &Inspections) -> Vec<Self> {
+        // The reports argument is an immutable reference, but we need ownership, so we make a
+        // clone here.  The retain method called below mutates the value, so we need our own copy.
+        let mut reports = reports.clone();
+        // The results variable will hold an event for each cctv report with a matching date.
+        let mut results = Vec::new();
+        // Retain the subset of values where the asset id matches.
+        reports.retain(|v| v.asset().asset_id() == self.asset_id());
+        // When the event and report refer to the same asset id...
+        for report in reports.iter() {
+            // Subset the date portion of the report's datetime field.
+            let date = report.date();
+            // Compare against the plan date, creation, and modify date.
+            // Not even data to determine which values are most relevent yet.
+            if date == self.plan_date()
+                || *date == civil::Date::from(*self.create_date())
+                || *date == civil::Date::from(*self.modify_date())
+            {
+                // Clone the event, to get an owned mutable version.
+                let mut event = self.clone();
+                // Asset id and date matches, attach the report to the event.
+                event.cctv = Some(report.clone());
+                // Push the report to the results vector.
+                results.push(event);
+            }
+        }
+        if results.is_empty() {
+            // No matches found. Return the original record with no reports attached.
+            vec![self.clone()]
+        } else {
+            // Return the vector of matched events.
+            results
+        }
+    }
+
+    /// The `add_manhole_card` method attaches a filepath for the manhole card to an event.
+    /// Cards match to events using the asset id.
+    /// Warns if multiple cards match to a single event.
+    pub fn add_manhole_card(&mut self, cards: &ManholeCards) {
+        let mut cards = cards.clone();
+        cards.retain(|v| v.asset().asset_id() == self.asset_id());
+        if cards.is_empty() {
+            tracing::trace!("Missing manhole card for asset id {}", self.asset_id());
+        } else if cards.len() == 1 {
+            self.manhole_card = Some(cards[0].path().clone());
+        } else {
+            tracing::warn!(
+                "Multiple manhole cards found for asset id {}",
+                self.asset_id()
+            );
+            self.manhole_card = Some(cards[0].path().clone());
         }
     }
 }
@@ -275,9 +310,11 @@ impl TryFrom<EventRaw> for Event {
             asset_id: value.asset_id,
             asset_kind,
             assigned_to: value.assigned_to,
+            cctv: None,
             create_date,
             created_by: value.created_by,
             maintenance,
+            manhole_card: None,
             modified_by: value.modified_by,
             modify_date,
             name: value.name,
@@ -304,12 +341,9 @@ impl TryFrom<&EventRaw> for Event {
     Debug,
     Clone,
     PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
     serde::Serialize,
     serde::Deserialize,
+    derive_new::new,
     derive_more::Deref,
     derive_more::DerefMut,
 )]
@@ -318,6 +352,7 @@ pub struct Events(Vec<Event>);
 impl Events {
     /// The `from_devices` method creates a new [`wastewater::event::DeviceEvents`] by matching the
     /// Beehive Event `asset_id` to the `asset_id` field in [`wastewater::device::Device`].
+    #[tracing::instrument]
     pub fn from_devices(
         &self,
         devices: &wastewater::device::Devices,
@@ -345,6 +380,7 @@ impl Events {
 
     /// The `from_lines` method creates a new [`wastewater::event::LineEvents`] by matching the
     /// Beehive Event `asset_id` to the `asset_id` field in [`wastewater::line::Line`].
+    #[tracing::instrument]
     pub fn from_lines(
         &self,
         lines: &wastewater::line::Lines,
@@ -372,6 +408,7 @@ impl Events {
 
     /// The `from_junctions` method creates a new [`wastewater::event::JunctionEvents`] by matching the
     /// Beehive Event `asset_id` to the `asset_id` field in [`wastewater::junction::Junction`].
+    #[tracing::instrument]
     pub fn from_junctions(
         &self,
         junctions: &wastewater::junction::Junctions,
@@ -395,6 +432,32 @@ impl Events {
         } else {
             None
         }
+    }
+
+    /// The `build_cctv_reports` method attaches cctv reports of type [`Inspection`] to an [`Event`] based upon matching asset id and report date.
+    /// If there are multiple reports corresponding to a single event, this method clones the event
+    /// data and produces one event for each cctv report.
+    #[tracing::instrument]
+    pub fn build_cctv_reports(&self, reports: &Inspections) -> Self {
+        let mut results: Vec<Event> = Vec::new();
+        let events = self
+            .par_iter()
+            .map(|v| v.add_cctv_builder(reports))
+            .collect::<Vec<Vec<Event>>>();
+        events
+            .iter()
+            .map(|v| results.extend(v.clone()))
+            .for_each(drop);
+        Self::new(results)
+    }
+
+    /// The `add_manhole_cards` method searching for a manhole card associated with each event in
+    /// `Events`.
+    #[tracing::instrument]
+    pub fn add_manhole_cards(&mut self, cards: &ManholeCards) {
+        self.par_iter_mut()
+            .map(|v| v.add_manhole_card(cards))
+            .for_each(drop);
     }
 }
 

@@ -105,7 +105,7 @@ impl Line {
     }
 }
 
-/// The `Devices` struct is a wrapper around a vector of type [`Device`].
+/// The `Lines` struct is a wrapper around a vector of type [`Line`].
 #[derive(
     Debug,
     Clone,
@@ -118,7 +118,8 @@ impl Line {
 pub struct Lines(Vec<Line>);
 
 impl Lines {
-    /// The `from_shp` method converts from shapefiles of type [`shapefile::Polygon'].
+    /// The `from_shp` method converts from shapefiles of type [`shapefile::PolylineZ'].
+    #[tracing::instrument(skip(path))]
     pub fn from_shp_z<P: AsRef<path::Path>>(path: P) -> aid::prelude::Clean<Self> {
         // the read_as method allows us to specify the spatial type, in this case PointZ
         // we also include the record field so we an read the field values.

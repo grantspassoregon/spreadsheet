@@ -2,7 +2,8 @@ use address::prelude::*;
 use aid::prelude::*;
 use clap::Parser;
 use spreadsheet::prelude::*;
-use tracing::{info, trace};
+use spreadsheet::utils;
+use tracing::info;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -39,11 +40,7 @@ Command to execute, including:
 ";
 
 fn main() -> Clean<()> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
-        .try_init()
-    {};
-    trace!("Subscriber initialized.");
+    utils::trace_init();
     let cli = Cli::parse();
 
     match cli.command.as_str() {

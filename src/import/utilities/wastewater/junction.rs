@@ -119,6 +119,7 @@ pub struct Junctions(Vec<Junction>);
 
 impl Junctions {
     /// The `from_shp_z` method converts from shapefiles of type [`shapefile::PointZ'].
+    #[tracing::instrument(skip(path))]
     pub fn from_shp_z<P: AsRef<path::Path>>(path: P) -> aid::prelude::Clean<Self> {
         // the read_as method allows us to specify the spatial type, in this case PointZ
         // we also include the record field so we an read the field values.

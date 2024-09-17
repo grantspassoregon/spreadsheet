@@ -1,20 +1,16 @@
 use address::business::BusinessLicenses;
-// use address::business::BusinessMatchRecords;
 use address::prelude::to_csv;
 use aid::prelude::*;
 use spreadsheet::data::*;
 use spreadsheet::import::beehive;
-use spreadsheet::import::utilities::wastewater;
+use spreadsheet::import::utilities::{self, wastewater};
 use spreadsheet::prelude::*;
-use tracing::{info, trace};
+use spreadsheet::utils;
+use tracing::info;
 
 #[test]
 fn load_industry_codes() -> Result<(), std::io::Error> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::TRACE)
-        .try_init()
-    {};
-    trace!("Subscriber initialized.");
+    utils::trace_init();
 
     let file_path = "./tests/test_data/business_categories.csv";
     let records = IndustryCodes::from_csv(file_path)?;
@@ -26,11 +22,7 @@ fn load_industry_codes() -> Result<(), std::io::Error> {
 
 #[test]
 fn write_industry_info() -> Result<(), std::io::Error> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::TRACE)
-        .try_init()
-    {};
-    trace!("Subscriber initialized.");
+    utils::trace_init();
 
     let file_path = "./tests/test_data/business_categories.csv";
     let records = IndustryCodes::from_csv(file_path)?;
@@ -43,11 +35,7 @@ fn write_industry_info() -> Result<(), std::io::Error> {
 
 #[test]
 fn load_licenses() -> Result<(), std::io::Error> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::TRACE)
-        .try_init()
-    {};
-    trace!("Subscriber initialized.");
+    utils::trace_init();
 
     let file_path = "./tests/test_data/active_business.csv";
     let records = ActiveLicenses::from_csv(file_path)?;
@@ -59,11 +47,7 @@ fn load_licenses() -> Result<(), std::io::Error> {
 
 #[test]
 fn license_code() -> Result<(), std::io::Error> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::TRACE)
-        .try_init()
-    {};
-    trace!("Subscriber initialized.");
+    utils::trace_init();
 
     let file_path = "./tests/test_data/active_business.csv";
     let records = ActiveLicenses::from_csv(file_path)?;
@@ -122,11 +106,7 @@ fn license_code() -> Result<(), std::io::Error> {
 
 #[test]
 fn load_county_taxlots() -> Result<(), std::io::Error> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::TRACE)
-        .try_init()
-    {};
-    trace!("Subscriber initialized.");
+    utils::trace_init();
     let file_path = "./tests/test_data/county_parcels.csv";
     let lots = CountyTaxlots::from_csv(file_path)?;
     assert_eq!(lots.len(), 5073);
@@ -139,11 +119,7 @@ fn load_county_taxlots() -> Result<(), std::io::Error> {
 fn convert_raw_bea() -> Clean<()> {
     // After running "download" from main in the `bea` crate, the download is in BeaDataRaw format.
     // Convert from raw to BeaData, then export to CSV and BIN.
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
-        .try_init()
-    {};
-    trace!("Subscriber initialized.");
+    utils::trace_init();
     dotenvy::dotenv().ok();
     let raw = std::env::var("BEA_CAINC5N_RAW")?;
     let csv = std::env::var("BEA_CAINC5N_CSV")?;
@@ -159,11 +135,7 @@ fn convert_raw_bea() -> Clean<()> {
 
 #[test]
 fn print_code_keys() -> Clean<()> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::TRACE)
-        .try_init()
-    {};
-    trace!("Subscriber initialized.");
+    utils::trace_init();
     dotenvy::dotenv().ok();
     let csv = std::env::var("BEA_CAINC5N_CSV")?;
 
@@ -182,11 +154,7 @@ fn print_code_keys() -> Clean<()> {
 
 #[test]
 fn print_fips_tree() -> Clean<()> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::TRACE)
-        .try_init()
-    {};
-    trace!("Subscriber initialized.");
+    utils::trace_init();
     dotenvy::dotenv().ok();
     let dat = std::env::var("BEA_CAINC5N_DAT")?;
     let records = BeaData::load(dat)?;
@@ -203,11 +171,7 @@ fn print_fips_tree() -> Clean<()> {
 
 #[test]
 fn print_fips_tree2() -> Clean<()> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
-        .try_init()
-    {};
-    trace!("Subscriber initialized.");
+    utils::trace_init();
     let records = BeaData::try_from(BeaDataRaw::from_csv("tests/test_data/bea.csv")?)?;
     let mut keys = records.iter().map(|r| r.geo_fips).collect::<Vec<i32>>();
     keys.sort();
@@ -220,14 +184,9 @@ fn print_fips_tree2() -> Clean<()> {
     Ok(())
 }
 
-// from here
 #[test]
 fn business_mailing() -> Clean<()> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::TRACE)
-        .try_init()
-    {};
-    trace!("Subscriber initialized.");
+    utils::trace_init();
 
     let situs = "c:/users/erose/documents/redwood_business_mailing_list.csv";
     let situs = BusinessesInfo::from_csv(situs)?;
@@ -265,13 +224,9 @@ fn business_mailing() -> Clean<()> {
 
 #[test]
 fn load_wastewater_events_raw() -> Result<(), std::io::Error> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
-        .try_init()
-    {};
-    trace!("Subscriber initialized.");
+    utils::trace_init();
 
-    let file_path = "./tests/test_data/wastewater_events_20240729.csv";
+    let file_path = "./tests/test_data/wastewater_events_20240808.csv";
     let records = beehive::EventsRaw::from_csv(file_path)?;
     info!("Records: {:?}", records.len());
     let records = beehive::Events::from(records);
@@ -287,10 +242,7 @@ fn load_wastewater_events_raw() -> Result<(), std::io::Error> {
 // This test confirms the shapefile on record loads without issue.
 #[test]
 fn read_wastewater_device() -> aid::prelude::Clean<()> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
-        .try_init()
-    {};
+    utils::trace_init();
     let device =
         wastewater::device::Devices::from_shp_z("c:/users/erose/shapefiles/wastewater_device.shp")?;
     tracing::info!("Devices found: {}", device.len());
@@ -300,10 +252,7 @@ fn read_wastewater_device() -> aid::prelude::Clean<()> {
 
 #[test]
 fn read_wastewater_line() -> aid::prelude::Clean<()> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
-        .try_init()
-    {};
+    utils::trace_init();
     let lines =
         wastewater::line::Lines::from_shp_z("c:/users/erose/shapefiles/wastewater_line.shp")?;
     tracing::info!("Lines found: {}", lines.len());
@@ -313,10 +262,7 @@ fn read_wastewater_line() -> aid::prelude::Clean<()> {
 
 #[test]
 fn read_wastewater_junction() -> aid::prelude::Clean<()> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
-        .try_init()
-    {};
+    utils::trace_init();
     let junctions = wastewater::junction::Junctions::from_shp_z(
         "c:/users/erose/shapefiles/wastewater_junction.shp",
     )?;
@@ -327,13 +273,9 @@ fn read_wastewater_junction() -> aid::prelude::Clean<()> {
 
 #[test]
 fn read_wastewater_events() -> aid::prelude::Clean<()> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
-        .try_init()
-    {};
-    trace!("Subscriber initialized.");
+    utils::trace_init();
 
-    let file_path = "./tests/test_data/wastewater_events_20240729.csv";
+    let file_path = "./tests/test_data/wastewater_events_20240808.csv";
     let records = beehive::EventsRaw::from_csv(file_path)?;
     let records = beehive::Events::from(records);
     info!("Records: {:?}", records.len());
@@ -364,14 +306,12 @@ fn read_wastewater_events() -> aid::prelude::Clean<()> {
 // Export wastewater devices to .shp from ArcPro.
 // Set projection to EPSG-3587.
 // Convert to Events layers and export to geojson.
+// Open geojson in QGIS and export to shapefile.
+// Open in ArcPro and force the correct projection.
 fn write_wastewater_events() -> aid::prelude::Clean<()> {
-    if let Ok(()) = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
-        .try_init()
-    {};
-    trace!("Subscriber initialized.");
+    utils::trace_init();
 
-    let file_path = "./tests/test_data/wastewater_events_20240729.csv";
+    let file_path = "./tests/test_data/wastewater_events_20240808.csv";
     let records = beehive::EventsRaw::from_csv(file_path)?;
     let records = beehive::Events::from(records);
     info!("Records: {:?}", records.len());
@@ -396,6 +336,134 @@ fn write_wastewater_events() -> aid::prelude::Clean<()> {
     )?;
     tracing::info!("Junctions found: {}", junctions.len());
     if let Some(junction_events) = records.from_junctions(&junctions) {
+        tracing::info!("Junction Events found: {}", junction_events.len());
+        let path = "C:/users/erose/geojson/junction_events.geojson";
+        junction_events.geojson(path)?;
+    }
+
+    Ok(())
+}
+
+#[test]
+fn read_manhole_cards() -> aid::prelude::Clean<()> {
+    utils::trace_init();
+    let card = wastewater::manhole_card::ManholeCard::read_dir("o:/beehive/collection/ssmh")?;
+    tracing::info!("Manhole cards: {:?}", card.len());
+    let device =
+        wastewater::device::Devices::from_shp_z("c:/users/erose/shapefiles/wastewater_device.shp")?;
+    tracing::info!("Devices found: {}", device.len());
+    let cards = wastewater::manhole_card::ManholeCards::from_devices(
+        &device,
+        &card[..],
+        "o:/beehive/collection/ssmh".into(),
+    );
+    tracing::info!("Cards found: {}", cards.len());
+    let target = "c:/users/erose/geojson/manhole_cards.geojson";
+    cards.geojson(target)?;
+    let orphans = cards.orphans(&card[..]);
+    tracing::info!("Orphans: {}", orphans.len());
+    Ok(())
+}
+
+#[test]
+fn read_cctv_inspections() -> aid::prelude::Clean<()> {
+    utils::trace_init();
+    let names = utilities::cctv::InspectionFiles::from_path("O:\\Beehive\\COLLECTION\\MJ'S WORK IN PROGRESS\\00 TV REPORTS\\PDF TRANSITIONS\\ADDED TO BEEHIVE")?;
+    // let names = utilities::cctv::InspectionFiles::from_path("o:/beehive/collection/mj's work in progress/00 tv reports/pdf transitions/added to beehive")?;
+    let lines =
+        wastewater::line::Lines::from_shp_z("c:/users/erose/shapefiles/wastewater_line.shp")?;
+    tracing::info!("Lines found: {}", lines.len());
+    let reports = utilities::cctv::Inspections::from_files(&names, &lines)?;
+    tracing::info!("CCTV Reports: {:?}", reports.len());
+    let out = "c:/users/erose/geojson/cctv_reports.geojson";
+    reports.geojson(out)?;
+
+    Ok(())
+}
+
+#[test]
+fn load_wastewater_event_cctv_reports() -> aid::prelude::Clean<()> {
+    utils::trace_init();
+
+    let file_path = "./tests/test_data/wastewater_events_20240808.csv";
+    let records = beehive::EventsRaw::from_csv(file_path)?;
+    info!("Records: {:?}", records.len());
+    let records = beehive::Events::from(records);
+    info!("Records: {:?}", records.len());
+    let names = utilities::cctv::InspectionFiles::from_path("O:\\Beehive\\COLLECTION\\MJ'S WORK IN PROGRESS\\00 TV REPORTS\\PDF TRANSITIONS\\ADDED TO BEEHIVE")?;
+    let lines =
+        wastewater::line::Lines::from_shp_z("c:/users/erose/shapefiles/wastewater_line.shp")?;
+    tracing::info!("Lines found: {}", lines.len());
+    let reports = utilities::cctv::Inspections::from_files(&names, &lines)?;
+    tracing::info!("CCTV Reports: {:?}", reports.len());
+    let records = records.build_cctv_reports(&reports);
+    tracing::info!("Records after adding reports: {}", records.len());
+    let mut cctv = records.clone();
+    cctv.retain(|v| v.cctv().is_some());
+    tracing::info!("Records with cctv attached {}", cctv.len());
+
+    Ok(())
+}
+
+#[test]
+// Load beehive events from a csv file.
+// Export wastewater devices to .shp from ArcPro.
+// Set projection to EPSG-3587.
+// Convert to Events layers and export to geojson.
+// Open geojson in QGIS and export to shapefile.
+// Open in ArcPro and force the correct projection.
+fn write_wastewater_events_with_reports() -> aid::prelude::Clean<()> {
+    utils::trace_init();
+
+    // Load devices, lines and junctions
+    let file_path = "./tests/test_data/wastewater_events_20240808.csv";
+    let events = beehive::EventsRaw::from_csv(file_path)?;
+    let mut events = beehive::Events::from(events);
+    info!("Records: {:?}", events.len());
+    let device =
+        wastewater::device::Devices::from_shp_z("c:/users/erose/shapefiles/wastewater_device.shp")?;
+    tracing::info!("Devices found: {}", device.len());
+    let lines =
+        wastewater::line::Lines::from_shp_z("c:/users/erose/shapefiles/wastewater_line.shp")?;
+    tracing::info!("Lines found: {}", lines.len());
+    let junctions = wastewater::junction::Junctions::from_shp_z(
+        "c:/users/erose/shapefiles/wastewater_junction.shp",
+    )?;
+    tracing::info!("Junctions found: {}", junctions.len());
+
+    // Load manhole cards.
+    let card = wastewater::manhole_card::ManholeCard::read_dir("o:/beehive/collection/ssmh")?;
+    tracing::info!("Manhole cards: {:?}", card.len());
+    let cards = wastewater::manhole_card::ManholeCards::from_devices(
+        &device,
+        &card[..],
+        "o:/beehive/collection/ssmh".into(),
+    );
+    tracing::info!("Cards found: {}", cards.len());
+    // Connect manhole cards to events.
+    events.add_manhole_cards(&cards);
+
+    // Load cctv reports.
+    let names = utilities::cctv::InspectionFiles::from_path("O:\\Beehive\\COLLECTION\\MJ'S WORK IN PROGRESS\\00 TV REPORTS\\PDF TRANSITIONS\\ADDED TO BEEHIVE")?;
+    let reports = utilities::cctv::Inspections::from_files(&names, &lines)?;
+    tracing::info!("CCTV Reports: {:?}", reports.len());
+
+    // Connect cctv reports to events.
+    let events = events.build_cctv_reports(&reports);
+    tracing::info!("Records after adding reports: {}", events.len());
+
+    // Write events to shapefiles.
+    if let Some(device_events) = events.from_devices(&device) {
+        tracing::info!("Device Events found: {}", device_events.len());
+        let path = "C:/users/erose/geojson/device_events.geojson";
+        device_events.geojson(path)?;
+    }
+    if let Some(line_events) = events.from_lines(&lines) {
+        tracing::info!("Line Events found: {}", line_events.len());
+        let path = "C:/users/erose/geojson/line_events.geojson";
+        line_events.geojson(path)?;
+    }
+    if let Some(junction_events) = events.from_junctions(&junctions) {
         tracing::info!("Junction Events found: {}", junction_events.len());
         let path = "C:/users/erose/geojson/junction_events.geojson";
         junction_events.geojson(path)?;

@@ -29,20 +29,34 @@ impl DeviceEvent {
         result.set_property("asset_group", self.asset.asset_group());
         result.set_property("asset_type", self.asset.asset_type());
         result.set_property("owner", self.asset.owner());
-        result.set_property("asset_kind", self.event.asset_kind());
+        result.set_property("asset_kind", self.event.asset_kind().to_string());
         result.set_property("assigned_to", self.event.assigned_to().clone());
         result.set_property("created_by", self.event.created_by().clone());
-        result.set_property("create_date", self.event.create_date());
-        result.set_property("maintenance", self.event.maintenance());
-        result.set_property("modify_date", self.event.modify_date());
+        result.set_property("create_date", self.event.create_date().to_string());
+        result.set_property(
+            "maintenance",
+            self.event.maintenance().clone().map(|v| v.to_string()),
+        );
+        result.set_property("modify_date", self.event.modify_date().to_string());
         result.set_property("modified_by", self.event.modified_by().clone());
         result.set_property("name", self.event.name().clone());
         result.set_property("notes", self.event.notes().clone());
-        result.set_property("event_kind", self.event.kind());
-        result.set_property("plan_date", self.event.plan_date());
-        result.set_property("priority", self.event.priority());
-        result.set_property("schedule_time", self.event.schedule_time());
-        result.set_property("status", self.event.status());
+        result.set_property("event_kind", self.event.kind().to_string());
+        result.set_property("plan_date", self.event.plan_date().to_string());
+        result.set_property("priority", self.event.priority().to_string());
+        result.set_property("schedule_time", self.event.schedule_time().to_string());
+        result.set_property("status", self.event.status().clone().map(|v| v.to_string()));
+        result.set_property(
+            "manhole_card",
+            self.event
+                .manhole_card()
+                .clone()
+                .map(|v| v.display().to_string()),
+        );
+        if let Some(cctv) = self.event.cctv() {
+            let report = cctv.file().path().display().to_string();
+            result.set_property("cctv", report);
+        }
         result
     }
 }
@@ -72,6 +86,7 @@ impl DeviceEvents {
     }
 
     /// The `geojson` method exports the contents of Self to the file location at `path`.
+    #[tracing::instrument(skip(path))]
     pub fn geojson<P: AsRef<path::Path>>(&self, path: P) -> aid::prelude::Clean<()> {
         let contents = self.feature_collection().to_string().into_bytes();
         let mut file = fs::File::create(path)?;
@@ -118,20 +133,34 @@ impl LineEvent {
         result.set_property("asset_group", self.asset.asset_group());
         result.set_property("asset_type", self.asset.asset_type());
         result.set_property("owner", self.asset.owner());
-        result.set_property("asset_kind", self.event.asset_kind());
+        result.set_property("asset_kind", self.event.asset_kind().to_string());
         result.set_property("assigned_to", self.event.assigned_to().clone());
         result.set_property("created_by", self.event.created_by().clone());
-        result.set_property("create_date", self.event.create_date());
-        result.set_property("maintenance", self.event.maintenance());
-        result.set_property("modify_date", self.event.modify_date());
+        result.set_property("create_date", self.event.create_date().to_string());
+        result.set_property(
+            "maintenance",
+            self.event.maintenance().clone().map(|v| v.to_string()),
+        );
+        result.set_property("modify_date", self.event.modify_date().to_string());
         result.set_property("modified_by", self.event.modified_by().clone());
         result.set_property("name", self.event.name().clone());
         result.set_property("notes", self.event.notes().clone());
-        result.set_property("event_kind", self.event.kind());
-        result.set_property("plan_date", self.event.plan_date());
-        result.set_property("priority", self.event.priority());
-        result.set_property("schedule_time", self.event.schedule_time());
-        result.set_property("status", self.event.status());
+        result.set_property("event_kind", self.event.kind().to_string());
+        result.set_property("plan_date", self.event.plan_date().to_string());
+        result.set_property("priority", self.event.priority().to_string());
+        result.set_property("schedule_time", self.event.schedule_time().to_string());
+        result.set_property("status", self.event.status().clone().map(|v| v.to_string()));
+        result.set_property(
+            "manhole_card",
+            self.event
+                .manhole_card()
+                .clone()
+                .map(|v| v.display().to_string()),
+        );
+        if let Some(cctv) = self.event.cctv() {
+            let report = cctv.file().path().display().to_string();
+            result.set_property("cctv", report);
+        }
         result
     }
 }
@@ -192,20 +221,34 @@ impl JunctionEvent {
         result.set_property("asset_group", self.asset.asset_group());
         result.set_property("asset_type", self.asset.asset_type());
         result.set_property("owner", self.asset.owner());
-        result.set_property("asset_kind", self.event.asset_kind());
+        result.set_property("asset_kind", self.event.asset_kind().to_string());
         result.set_property("assigned_to", self.event.assigned_to().clone());
         result.set_property("created_by", self.event.created_by().clone());
-        result.set_property("create_date", self.event.create_date());
-        result.set_property("maintenance", self.event.maintenance());
-        result.set_property("modify_date", self.event.modify_date());
+        result.set_property("create_date", self.event.create_date().to_string());
+        result.set_property(
+            "maintenance",
+            self.event.maintenance().clone().map(|v| v.to_string()),
+        );
+        result.set_property("modify_date", self.event.modify_date().to_string());
         result.set_property("modified_by", self.event.modified_by().clone());
         result.set_property("name", self.event.name().clone());
         result.set_property("notes", self.event.notes().clone());
-        result.set_property("event_kind", self.event.kind());
-        result.set_property("plan_date", self.event.plan_date());
-        result.set_property("priority", self.event.priority());
-        result.set_property("schedule_time", self.event.schedule_time());
-        result.set_property("status", self.event.status());
+        result.set_property("event_kind", self.event.kind().to_string());
+        result.set_property("plan_date", self.event.plan_date().to_string());
+        result.set_property("priority", self.event.priority().to_string());
+        result.set_property("schedule_time", self.event.schedule_time().to_string());
+        result.set_property("status", self.event.status().clone().map(|v| v.to_string()));
+        result.set_property(
+            "manhole_card",
+            self.event
+                .manhole_card()
+                .clone()
+                .map(|v| v.display().to_string()),
+        );
+        if let Some(cctv) = self.event.cctv() {
+            let report = cctv.file().path().display().to_string();
+            result.set_property("cctv", report);
+        }
         result
     }
 }

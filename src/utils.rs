@@ -6,6 +6,8 @@ use nom::character::complete;
 use nom::{bytes, character, combinator};
 use serde::de::{Deserialize, DeserializeOwned, Deserializer};
 use serde::Serialize;
+use std::path;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 /// Function for deserailizing ArcGIS data that may contain either empty (Null) fields, or fields
 /// with string value "\<Null\>", either of which should translate to `None`.
@@ -131,8 +133,8 @@ pub fn datetime(input: &str) -> aid::prelude::Clean<(&str, civil::DateTime)> {
     // Convert the associated time.
     match hm24(rem) {
         Ok((rem, (hour, minutes))) => Ok((rem, date.at(hour, minutes, 0, 0))),
-        Err(e) => {
-            tracing::trace!("Associated time missing: {}", e.to_string());
+        Err(_) => {
+            // tracing::trace!("Associated time missing: {}", e.to_string());
             Ok((rem, date.at(0, 0, 0, 0)))
         }
     }
@@ -198,4 +200,31 @@ pub fn read_num(record: &shapefile::dbase::Record, field: &str) -> Option<f64> {
         }
     }
     result
+}
+
+/// The `build_path` is a hacky workaround for reconstructing file paths until I figure out how to
+/// use the native file system API better.
+pub fn build_path(
+    title: &str,
+    ext: &str,
+    path: path::PathBuf,
+) -> aid::prelude::Clean<path::PathBuf> {
+    let os_string = path.into_os_string();
+    let path_string = os_string.into_string().unwrap();
+    let string = format!("{path_string}\\{title}.{ext}");
+    Ok(path::PathBuf::from(string))
+}
+
+/// The `trace_init` function initializing the tracing subscriber.
+pub fn trace_init() {
+    if tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "spreadsheet=info".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .try_init()
+        .is_ok()
+    {};
+    tracing::info!("Subscriber initialized.");
 }
