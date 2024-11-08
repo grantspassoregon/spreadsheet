@@ -471,10 +471,7 @@ impl BusinessInfo {
 
     /// The `from_match` method converts a [`address::prelude::BusinessMatchRecord`] to a
     /// `BusinessInfo` struct.
-    pub fn from_match(
-        business: &address::prelude::BusinessMatchRecord,
-        codes: &IndustryCodes,
-    ) -> Self {
+    pub fn from_match(business: &address::BusinessMatchRecord, codes: &IndustryCodes) -> Self {
         let company_name = business.company_name().unwrap_or_default();
         let contact_name = business.contact_name();
         let dba = business.dba();
@@ -493,16 +490,8 @@ impl BusinessInfo {
         let created_date = None;
         let last_edited_user = None;
         let last_edited_date = None;
-        let x_coordinate = if let Some(long) = business.longitude() {
-            long
-        } else {
-            0.
-        };
-        let y_coordinate = if let Some(lat) = business.latitude() {
-            lat
-        } else {
-            0.
-        };
+        let x_coordinate = business.longitude().unwrap_or(0.);
+        let y_coordinate = business.latitude().unwrap_or(0.);
         BusinessInfo {
             company_name,
             contact_name,
@@ -535,10 +524,7 @@ pub struct BusinessesInfo(Vec<BusinessInfo>);
 impl BusinessesInfo {
     /// Creates a new `BusinessesInfo` from [`address::prelude::BusinessMatchRecords`] and an
     /// [`IndustryCodes`] struct.
-    pub fn from_matches(
-        businesses: &address::prelude::BusinessMatchRecords,
-        codes: &IndustryCodes,
-    ) -> Self {
+    pub fn from_matches(businesses: &address::BusinessMatchRecords, codes: &IndustryCodes) -> Self {
         let records = businesses
             .iter()
             .map(|r| BusinessInfo::from_match(r, codes))
@@ -666,8 +652,9 @@ impl MailingListItem {
         if !addr.is_empty() {
             let mut csz = parcels
                 .iter()
-                .filter(|v| addr.contains(v.address_ref()))
+                .filter(|v| addr.contains(v.address()))
                 .map(|v| v.csz())
+                .cloned()
                 .collect::<Vec<String>>();
             csz.sort();
             csz.dedup();
@@ -685,13 +672,15 @@ impl MailingListItem {
                 .collect::<Vec<String>>();
             let situs = parcels
                 .par_iter()
-                .filter(|v| v.address_ref() == mailing)
+                .filter(|v| v.address() == mailing)
                 .map(|v| v.situs())
+                .cloned()
                 .collect::<Vec<String>>();
             let tax_parcels = parcels
                 .par_iter()
-                .filter(|v| situs.contains(v.situs_ref()))
-                .map(|v| v.parcel())
+                .filter(|v| situs.contains(v.situs()))
+                .map(|v| v.map_number())
+                .cloned()
                 .collect::<Vec<String>>();
             Ok(MailingListItem {
                 name: name.to_string(),
@@ -718,8 +707,8 @@ impl MailingListItem {
         if !addr.is_empty() {
             let mut csz = parcels
                 .iter()
-                .filter(|v| addr.contains(v.address_ref()))
-                .map(|v| v.csz())
+                .filter(|v| addr.contains(v.address()))
+                .map(|v| v.csz().clone())
                 .collect::<Vec<String>>();
             csz.sort();
             csz.dedup();
@@ -737,13 +726,13 @@ impl MailingListItem {
                 .collect::<Vec<String>>();
             let situs = parcels
                 .par_iter()
-                .filter(|v| v.address_ref() == mailing)
-                .map(|v| v.situs())
+                .filter(|v| v.address() == mailing)
+                .map(|v| v.situs().clone())
                 .collect::<Vec<String>>();
             let tax_parcels = parcels
                 .par_iter()
-                .filter(|v| situs.contains(v.situs_ref()))
-                .map(|v| v.parcel())
+                .filter(|v| situs.contains(v.situs()))
+                .map(|v| v.map_number().clone())
                 .collect::<Vec<String>>();
             Ok(MailingListItem {
                 name: name.to_string(),

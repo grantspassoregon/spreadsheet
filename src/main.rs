@@ -1,4 +1,4 @@
-use address::prelude::*;
+use address::{GrantsPassSpatialAddresses, Portable, SpatialAddresses};
 use aid::prelude::*;
 use clap::Parser;
 use spreadsheet::prelude::*;
@@ -31,6 +31,13 @@ struct Cli {
         default_missing_value = "None"
     )]
     data: Option<std::path::PathBuf>,
+    #[arg(
+        short = 'o',
+        long,
+        help = "Output file path.",
+        default_missing_value = "None"
+    )]
+    out: Option<std::path::PathBuf>,
 }
 
 const CMD_HELP: &str = "
@@ -78,6 +85,22 @@ fn main() -> Clean<()> {
                 if let Some(file) = cli.target {
                     mail.to_csv(&file)?;
                     info!("Mailing list output to {}", &file.display());
+                }
+            }
+        }
+        "compare" => {
+            if let Some(path) = cli.source {
+                info!("Importing county taxlots.");
+                let records = CountyTaxlots::from_csv(path)?;
+                info!("Records: {}", records.len());
+                if let Some(target) = cli.target {
+                    let addresses = address::GrantsPassSpatialAddresses::from_csv(target)?;
+                    let mut matches = records.compare(&addresses)?;
+                    info!("Records: {:?}", matches.len());
+                    if let Some(out) = cli.out {
+                        info!("Writing results to {out:?}.");
+                        matches.to_csv(out)?;
+                    }
                 }
             }
         }

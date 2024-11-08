@@ -1,62 +1,67 @@
-use address::business::BusinessLicenses;
-use address::prelude::to_csv;
+use address::{to_csv, BusinessLicenses, Portable};
 use aid::prelude::*;
 use spreadsheet::data::*;
 use spreadsheet::import::beehive;
 use spreadsheet::import::utilities::{self, wastewater};
 use spreadsheet::prelude::*;
 use spreadsheet::utils;
+use test_log::test;
 use tracing::info;
 
+// Business License Tests
+//
+// Reads industry codes from a csv of business categories.  The business categories are extracted
+// from the data set, not from a dictionary, so may not be complete.  When the dataset is updated,
+// this file should also be updated.
+//
+// Used for creating the active businesses layer.
 #[test]
 fn load_industry_codes() -> Result<(), std::io::Error> {
-    utils::trace_init();
-
     let file_path = "./tests/test_data/business_categories.csv";
     let records = IndustryCodes::from_csv(file_path)?;
     info!("Records: {:?}", records.len());
     assert_eq!(records.len(), 370);
-
     Ok(())
 }
 
+// Derives industry subsection information based on the industry code.
+// Writes results to industry_info.csv.
+// Used for creating the active businesses layer.
 #[test]
 fn write_industry_info() -> Result<(), std::io::Error> {
-    utils::trace_init();
-
     let file_path = "./tests/test_data/business_categories.csv";
     let records = IndustryCodes::from_csv(file_path)?;
     info!("Records: {:?}", records.len());
     let mut industry_info = IndustryInfos::from(&records);
     industry_info.to_csv("./tests/test_data/industry_info.csv".into())?;
-
     Ok(())
 }
 
+// Reads active business licenses into the ActiveLicenses type.
+// The active_business.csv file is exported from EnerGov, capturing active licenses.
+// The first step of reading licenses into GIS.
+// This test confirms the import works with a list of known length.
 #[test]
 fn load_licenses() -> Result<(), std::io::Error> {
-    utils::trace_init();
-
     let file_path = "./tests/test_data/active_business.csv";
     let records = ActiveLicenses::from_csv(file_path)?;
     assert_eq!(records.len(), 2521);
     info!("Records: {:?}", records.len());
-
     Ok(())
 }
 
+// Duplicates logic in load_licenses.
+// One-off test to get the industry code for a business given a license number.
+// Tests the ActiveLicenses::code() method.
 #[test]
 fn license_code() -> Result<(), std::io::Error> {
-    utils::trace_init();
-
     let file_path = "./tests/test_data/active_business.csv";
     let records = ActiveLicenses::from_csv(file_path)?;
     info!("Records: {:?}", records.len());
     let license = records[0].license();
     let code = records.code(&license);
-    assert_eq!(code, 812320);
     info!("Code is: {:?}", code);
-
+    assert_eq!(code, 812320);
     Ok(())
 }
 
@@ -104,14 +109,28 @@ fn license_code() -> Result<(), std::io::Error> {
 //     Ok(())
 // }
 
+// Test if county parcel data loads into the CountyTaxlots type.
+// county_parcels.csv is an export of the dataframe from the taxlot GIS layer.
 #[test]
 fn load_county_taxlots() -> Result<(), std::io::Error> {
-    utils::trace_init();
     let file_path = "./tests/test_data/county_parcels.csv";
     let lots = CountyTaxlots::from_csv(file_path)?;
-    assert_eq!(lots.len(), 5073);
     info!("Records: {:?}", lots.len());
+    assert_eq!(lots.len(), 16260);
+    Ok(())
+}
 
+#[test]
+fn parcel_address_match() -> Clean<()> {
+    let file_path = "./tests/test_data/county_parcels.csv";
+    let lots = CountyTaxlots::from_csv(file_path)?;
+    let file_path = "../address/data/city_addresses_20241007.csv";
+    let addresses = address::SpatialAddresses::from(
+        &address::GrantsPassSpatialAddresses::from_csv(file_path)?[..],
+    );
+    let mut matches = lots.compare(&addresses)?;
+    info!("Records: {:?}", matches.len());
+    matches.to_csv("c:/users/erose/documents/parcel_address_match.csv")?;
     Ok(())
 }
 

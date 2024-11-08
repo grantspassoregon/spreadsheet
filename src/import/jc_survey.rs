@@ -1,4 +1,6 @@
-use address::prelude::*;
+use address::{
+    MatchPartialRecord, MatchStatus, Parser, PartialAddress, PartialAddresses, SpatialAddresses,
+};
 use aid::prelude::*;
 use indicatif::ProgressBar;
 use serde::{Deserialize, Serialize};
