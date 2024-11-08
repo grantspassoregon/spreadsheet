@@ -18,8 +18,8 @@ aid = { git = "https://github.com/grantspassoregon/aid.git", default-features = 
   "gis",
   "time",
 ] }
-# address = { git = "https://github.com/grantspassoregon/address.git" }
-address = { path = "../address" }
+address = { git = "https://github.com/grantspassoregon/address.git" }
+# address = { path = "../address" }
 bincode = "1.3.3"
 clap = { version = "4.5.20", features = ["derive"] }
 csv = "1.3.0"
